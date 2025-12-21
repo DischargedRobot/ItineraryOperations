@@ -1,0 +1,35 @@
+@ItineraryOperations_HostAddress = http://localhost:5212
+
+POST {{ItineraryOperations_HostAddress}}/Calculations/taskOrder/5
+Accept: application/json
+
+###
+
+POST {{ItineraryOperations_HostAddress}}/Calculations/operation/21
+Accept: application/json
+
+###
+
+GET {{ItineraryOperations_HostAddress}}/Calculations/operation/1
+Accept: application/json
+
+###
+
+Delete {{ItineraryOperations_HostAddress}}/Calculations/operation/1
+Accept: application/json
+
+###
+
+GET {{ItineraryOperations_HostAddress}}/typesoperations/100
+Accept: application/json
+
+###
+POST {{ItineraryOperations_HostAddress}}/TaskOrders
+Accept: application/json
+Content-Type: application/json
+
+{
+  "DivisionID": 2,
+  "ExecutorID": 2,
+  "Operations": []
+}
