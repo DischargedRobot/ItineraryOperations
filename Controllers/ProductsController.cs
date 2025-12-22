@@ -1,6 +1,7 @@
 ﻿using ItineraryOperations.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using Npgsql.PostgresTypes;
 
@@ -10,6 +11,7 @@ namespace ItineraryOperations.Controllers
     [ApiController]
     public class ProductsController : ControllerBase
     {
+        private readonly int COUNT_SKIPPED_PER_PAGES = 100;
 
         private readonly PostgresContext _context;
 
@@ -22,13 +24,34 @@ namespace ItineraryOperations.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Products>>> Get()
+        public async Task<ActionResult<IEnumerable<Products>>> Get([FromQuery] int count, [FromQuery] int page)
         {
-            return Ok(await _context.Products.Select( item => new Products
+            List<Products> products = await _context.Products.OrderBy(p => p.ID).Skip(page * COUNT_SKIPPED_PER_PAGES).Take(count).ToListAsync();
+
+            if (products.Count == 0)
             {
-                ID = item.ID,
-                Name = item.Name,
-            }).ToArrayAsync());
+                return NotFound();
+            }
+            else
+            {
+                return Ok(products);
+            }
+        }
+
+        // Получение списка продуктов с фильтрацией по подразделению
+        [HttpGet("{divisionID}")]
+        public async Task<ActionResult<IEnumerable<Products>>> GetAllByDivision([FromQuery] int count, [FromQuery] int page, int divisionID)
+        {
+            List<Products> products = await _context.Products.OrderBy(p => p.ID).Where(p => p.DivisionID == divisionID).Skip(page * COUNT_SKIPPED_PER_PAGES).Take(count).ToListAsync();
+
+            if (products.Count == 0)
+            {
+                return NotFound();
+            }
+            else
+            {
+                return Ok(products);
+            }
         }
 
         [HttpGet("{id}")]
@@ -46,8 +69,8 @@ namespace ItineraryOperations.Controllers
             } 
         }
 
-        [HttpGet("by-AUDCode")]
-        public ActionResult<Products> GetByAUDCode([FromQuery] string AUDCode)
+        [HttpGet("by-AUDCode/{AUDCode}")]
+        public ActionResult<Products> GetByAUDCode(string AUDCode)
         {
             Products? product = _context.Products.FirstOrDefault(item => item.AUDCode == AUDCode);
 

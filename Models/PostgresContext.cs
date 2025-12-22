@@ -34,6 +34,11 @@ namespace ItineraryOperations.Models
                         .WithMany()
                         .HasForeignKey(itinerary => itinerary.AUDCode)
                         .HasPrincipalKey(mainSubject => mainSubject.AUDCode);
+
+            modelBuilder.Entity<Itinerary>()
+                        .Property(i => i.Date)
+                        .HasDefaultValueSql("CURRENT_DATE");
+
         }
         public PostgresContext(DbContextOptions<PostgresContext> options): base(options) 
         { 

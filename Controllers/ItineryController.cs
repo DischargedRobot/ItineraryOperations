@@ -26,16 +26,10 @@ namespace ItineraryOperations.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Itinerary>>> Get([FromQuery] int count, [FromQuery] int page)
         {
-            List<Itinerary> itineraries = await _context.Itineraries.Skip(page * COUNT_SKIPPED_PER_PAGES).Take(count).Select(item => new Itinerary
-            {
-                ID = item.ID,
-                PositionPlanID = item.PositionPlanID,
-                AUDCode = item.AUDCode,
-                AUDName = item.AUDName,
-                Operations = item.Operations,
-                NumberPositions = item.NumberPositions,
-                KitIncreasingKit = item.KitIncreasingKit
-            }).ToListAsync();
+            List<Itinerary> itineraries = await _context.Itineraries.Skip(page * COUNT_SKIPPED_PER_PAGES)
+                                                                    .OrderBy(i => i.ID)
+                                                                    .Take(count)
+                                                                    .ToListAsync();
 
             if (itineraries.Count == 0)
             {
@@ -46,6 +40,30 @@ namespace ItineraryOperations.Controllers
                return Ok(itineraries);
             }
         }
+
+        [HttpGet("by-date")]
+        public async Task<ActionResult<IEnumerable<Itinerary>>> GetByDate([FromQuery] int count, [FromQuery] int page, [FromQuery] DateOnly dateStart, [FromQuery] DateOnly? dateEnd)
+        {
+            if (!dateEnd.HasValue)
+            {
+                dateEnd = new DateOnly(dateStart.Year, dateStart.Month, DateTime.DaysInMonth(dateStart.Year, dateStart.Month));
+            }
+            List<Itinerary> itineraries = await _context.Itineraries.Where(i => i.Date >= dateStart && i.Date <= dateEnd)
+                                                                    .OrderBy(i => i.ID)
+                                                                    .Skip(page * COUNT_SKIPPED_PER_PAGES)
+                                                                    .Take(count)
+                                                                    .ToListAsync();
+
+            if (itineraries.Count == 0)
+            {
+                return NotFound();
+            }
+            else
+            {
+                return Ok(itineraries);
+            }
+        }
+
 
         [HttpGet("{id}")]
         public ActionResult<Itinerary> Get(int id)

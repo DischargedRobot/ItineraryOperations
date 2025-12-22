@@ -24,30 +24,96 @@ namespace ItineraryOperations.Controllers
             _logger = logger;
         }
 
+    //    .Select(item => new OperationsOfItinerary
+    //        {
+    //            ID = item.ID,
+    //            ItineraryID = item.ItineraryID,
+    //            DivisionID = item.DivisionID,
+    //            CategoryID = item.CategoryID,
+    //            NormTime = item.NormTime,
+    //            TypeOperation = item.TypeOperation,
+    //            NumberPositions = item.NumberPositions,
+    //            EquipmentID = item.EquipmentID,
+    //            Status = item.Status,
+    //            ExecutorID = item.ExecutorID,
+    //            Name = item.Name,
+    //            PaymentCoefficient = item.PaymentCoefficient,
+    //            Reward = item.Reward,
+    //            DateIssue = item.DateIssue,
+    //            DateExecution = item.DateExecution,
+    //            TotalWithSurcharge = item.TotalWithSurcharge,
+    //            RewardAmount = item.RewardAmount
+    //})
+
         [HttpGet]
         public async Task<ActionResult<IEnumerable<OperationsOfItinerary>>> Get()
         {
-            List<OperationsOfItinerary> operations = await _context.OperationsOfItinerary.Select(item => new OperationsOfItinerary
+            List<OperationsOfItinerary> operations = await _context.OperationsOfItinerary.ToListAsync();
+
+            if (operations.Count == 0)
             {
-                ID = item.ID,
-                ItineraryID = item.ItineraryID,
-                DivisionID = item.DivisionID,
-                CategoryID = item.CategoryID,
-                NormTime = item.NormTime,
-                TypeOperation = item.TypeOperation,
-                NumberPositions = item.NumberPositions,
-                EquipmentID = item.EquipmentID,
-                Status = item.Status,
-                ExecutorID = item.ExecutorID,
-                Name = item.Name,
-                PaymentCoefficient = item.PaymentCoefficient,
-                Reward = item.Reward,
-                DateIssue = item.DateIssue,
-                DateExecution = item.DateExecution,
-                TotalWithSurcharge = item.TotalWithSurcharge,
-                RewardAmount = item.RewardAmount
-            })
-            .ToListAsync();
+                return NotFound();
+            }
+            else
+            {
+                return Ok(operations);
+            }
+        }
+
+        [HttpGet("by-itinerary/{itineraryID}")]
+        public async Task<ActionResult<IEnumerable<OperationsOfItinerary>>> GetByItinerary(int itineraryID)
+        {
+            List<OperationsOfItinerary> operations = await _context.OperationsOfItinerary.Where(op => op.ItineraryID == itineraryID).ToListAsync();
+
+            if (operations.Count == 0)
+            {
+                return NotFound();
+            }
+            else
+            {
+                return Ok(operations);
+            }
+        }
+
+        [HttpGet("by-executor/{executorID}")]
+        public async Task<ActionResult<IEnumerable<OperationsOfItinerary>>> GetByExecutor(int executorID)
+        {
+            List<OperationsOfItinerary> operations = await _context.OperationsOfItinerary.Where(op => op.ExecutorID == executorID).ToListAsync();
+
+            if (operations.Count == 0)
+            {
+                return NotFound();
+            }
+            else
+            {
+                return Ok(operations);
+            }
+        }
+
+        [HttpGet("by-division/{divisionID}")]
+        public async Task<ActionResult<IEnumerable<OperationsOfItinerary>>> GetByDivision(int divisionID)
+        {
+            List<OperationsOfItinerary> operations = await _context.OperationsOfItinerary.Where(op => op.DivisionID == divisionID).ToListAsync();
+
+            if (operations.Count == 0)
+            {
+                return NotFound();
+            }
+            else
+            {
+                return Ok(operations);
+            }
+        }
+
+        [HttpGet("by-date")]
+        public async Task<ActionResult<IEnumerable<OperationsOfItinerary>>> GetByDate([FromQuery] int count, [FromQuery] int page, [FromQuery] DateOnly dateStart, [FromQuery] DateOnly? dateEnd)
+        {
+            if (!dateEnd.HasValue)
+            {
+                dateEnd = new DateOnly(dateStart.Year, dateStart.Month, DateTime.DaysInMonth(dateStart.Year, dateStart.Month));
+            }
+            List<OperationsOfItinerary> operations = await _context.OperationsOfItinerary.Where(i => i.DateIssue >= dateStart && i.DateIssue <= dateEnd)
+                                                                    .ToListAsync();
 
             if (operations.Count == 0)
             {
@@ -60,7 +126,7 @@ namespace ItineraryOperations.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<OperationsOfItinerary>> Get(int id)
+        public async Task<ActionResult<OperationsOfItinerary>> GetByID(int id)
         {
             OperationsOfItinerary? operations = await _context.OperationsOfItinerary.FirstOrDefaultAsync(item => item.ID == id);
             if (operations == null)

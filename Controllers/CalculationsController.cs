@@ -54,21 +54,7 @@ namespace ItineraryOperations.Controllers
         //    })
         //    .ToArrayAsync());
         //}
-
-        //[HttpGet("{id}")]
-        //public async Task<ActionResult> GetById(int id)
-        //{
-        //    Divisions? executor = await _context.Divisions.FirstOrDefaultAsync(item => item.ID == id);
-        //    if (executor == null)
-        //    {
-        //        return NotFound();
-        //    }
-        //    else
-        //    {
-        //        return Ok(executor);
-        //    }
-        //}
-
+        
         [HttpPost("operation")]
         public IActionResult PostOperation([FromBody] CalculationOperationDto calculationOperation)
         {

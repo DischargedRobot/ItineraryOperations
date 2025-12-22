@@ -29,6 +29,11 @@ namespace ItineraryOperations.Models
         [Required]
         public string KitIncreasingKit { get; set; }
 
+        [Required]
+        public DateOnly Date { get; set; }
+
+        [Required]
+        public string Route { get; set; }
         public static void Felling(PostgresContext context)
         {
             context.Itineraries.ExecuteDelete();
