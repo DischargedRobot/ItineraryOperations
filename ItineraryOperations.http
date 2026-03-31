@@ -20,16 +20,21 @@ Accept: application/json
 
 ###
 
-GET {{ItineraryOperations_HostAddress}}/typesoperations/100
+GET {{ItineraryOperations_HostAddress}}/api/OperationsOfItinerary
 Accept: application/json
 
 ###
-POST {{ItineraryOperations_HostAddress}}/TaskOrders
+GET {{ItineraryOperations_HostAddress}}/api/Executors
+Accept: application/json
+Content-Type: application/json
+
+###
+GET {{ItineraryOperations_HostAddress}}/api/Products
 Accept: application/json
 Content-Type: application/json
 
 {
-  "DivisionID": 2,
+  "DivisionID": 115,
   "ExecutorID": 2,
   "Operations": []
 }
