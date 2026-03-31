@@ -6,7 +6,7 @@ using Npgsql.PostgresTypes;
 
 namespace ItineraryOperations.Controllers
 {
-    [Route("[controller]")]
+    [Route("api/[controller]")]
     [ApiController]
     public class EquipmentController : ControllerBase
     {
@@ -21,9 +21,13 @@ namespace ItineraryOperations.Controllers
         }
 
         [HttpGet]
-        public ActionResult<IEnumerable<Equipment>> Get()
+        public async Task<ActionResult<IEnumerable<EquipmentDto>>> Get()
         {
-            return Ok(_context.Equipment.ToList());
+            return Ok(await _context.Equipment
+                .AsNoTracking()
+                .Select(equipment => new EquipmentDto(equipment))
+                .ToListAsync()
+                );
         }
 
 
