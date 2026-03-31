@@ -1,4 +1,5 @@
-﻿namespace ItineraryOperations.Models
+﻿
+namespace ItineraryOperations.Models
 {
     public class CalculationTaskOrder
     {

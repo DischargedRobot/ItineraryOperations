@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using ItineraryOperations.Models.Executor;
+using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Security.Cryptography.X509Certificates;
@@ -32,11 +33,19 @@ namespace ItineraryOperations.Models
             {
                 int element = random.Next(operations.Count);
                 var operation = operations[element];
-                context.TaskOrders.Add(new TaskOrders {
+                if (operation?.ExecutorID is int executorId)
+                {
+                    context.TaskOrders.Add(new TaskOrders
+                    {
                         DivisionID = operation.DivisionID,
-                        ExecutorID = operation.ExecutorID,
+                        ExecutorID = executorId,
                         Operations = new List<OperationsOfItinerary>() { operation }
                     });
+                } else
+                {
+                    return 1;
+                }
+                
                 operations.RemoveAt(element);
                 return 1;
             }).ToList();

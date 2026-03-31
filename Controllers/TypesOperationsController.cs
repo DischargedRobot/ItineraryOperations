@@ -6,7 +6,7 @@ namespace ItineraryOperations.Controllers
 {
 
     [ApiController]
-    [Route("[controller]")]
+    [Route("api/[controller]")]
     public class TypesOperationsController : ControllerBase
     {
 

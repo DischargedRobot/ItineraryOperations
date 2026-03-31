@@ -7,10 +7,12 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using ItineraryOperations.Models;
 using Microsoft.CodeAnalysis.Elfie.Serialization;
+using Swashbuckle.AspNetCore.Annotations;
+using Swashbuckle.AspNetCore.Filters;
 
 namespace ItineraryOperations.Controllers
 {
-    [Route("[controller]")]
+    [Route("api/[controller]")]
     [ApiController]
     public class OperationsOfItineraryController : Controller
     {
@@ -48,6 +50,9 @@ namespace ItineraryOperations.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<OperationsOfItinerary>>> Get()
         {
+            Console.WriteLine("startsss");
+
+            OperationsOfItinerary.Felling(_context);
             List<OperationsOfItinerary> operations = await _context.OperationsOfItinerary.ToListAsync();
 
             if (operations.Count == 0)
@@ -76,13 +81,20 @@ namespace ItineraryOperations.Controllers
         }
 
         [HttpGet("by-executor/{executorID}")]
-        public async Task<ActionResult<IEnumerable<OperationsOfItinerary>>> GetByExecutor(int executorID)
+        [SwaggerResponse(StatusCodes.Status200OK, "Успешно", typeof(OperationsOfItineraryDto))]
+        [SwaggerResponse(StatusCodes.Status404NotFound, "Не найдено", typeof(APIError400Example))]
+        [SwaggerResponseExample(StatusCodes.Status404NotFound, typeof(APIError404Example))]
+        public async Task<ActionResult<IEnumerable<OperationsOfItineraryDto>>> GetByExecutor(int executorID)
         {
-            List<OperationsOfItinerary> operations = await _context.OperationsOfItinerary.Where(op => op.ExecutorID == executorID).ToListAsync();
+            
+            List<OperationsOfItineraryDto> operations = await _context.OperationsOfItinerary
+                .Where(op => op.ExecutorID == executorID)
+                .Select(operation => new OperationsOfItineraryDto (operation))
+                .ToListAsync();
 
             if (operations.Count == 0)
             {
-                return NotFound();
+                return NotFound(new APIError { Message = "Операций у этого исполнителя нет"});
             }
             else
             {

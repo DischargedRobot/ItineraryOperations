@@ -2,7 +2,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace ItineraryOperations.Models
+namespace ItineraryOperations.Models.Executor
 {
     public class Executors
     {
@@ -12,8 +12,8 @@ namespace ItineraryOperations.Models
         public bool isBrigade { get; set; }
 
         [Required]
-        public required string[] Members { get; set; }
-        
+        public required string[] Members { get; set; } = Array.Empty<string>();
+
         public int DivisionID { get; set; }
         [ForeignKey("DivisionID")]
         public Divisions? Divisions { get; set; }

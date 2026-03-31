@@ -6,7 +6,7 @@ using Npgsql.PostgresTypes;
 
 namespace ItineraryOperations.Controllers
 {
-    [Route("[controller]")]
+    [Route("api/[controller]")]
     [ApiController]
     public class PlanPositionsController : ControllerBase
     {
@@ -24,9 +24,9 @@ namespace ItineraryOperations.Controllers
 
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<PlanPosition>>> Get([FromQuery] int count, [FromQuery] int page)
+        public async Task<ActionResult<IEnumerable<PlanPosition>>> Get([FromQuery] int count = 100, [FromQuery] int page = 1)
         {
-            List<PlanPosition> planPositions = await _context.PlanPositions.Skip(page * COUNT_SKIPPED_PER_PAGES).Take(count).Select(item => new PlanPosition
+            List<PlanPosition> planPositions = await _context.PlanPositions.Skip((page-1) * COUNT_SKIPPED_PER_PAGES).Take(count).Select(item => new PlanPosition
             {
                 ID = item.ID,
                 ProductID = item.ProductID

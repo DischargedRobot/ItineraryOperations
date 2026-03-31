@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using ItineraryOperations.Models.Executor;
+using Microsoft.EntityFrameworkCore;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -36,11 +37,11 @@ namespace ItineraryOperations.Models
 
         public int EquipmentID { get; set; }
         [ForeignKey("EquipmentID"), Required]
-        public Equipment? Equipment {get; set;}
+        public Equipment? Equipment { get; set; }
 
         public int Status { get; set; }
 
-        public int ExecutorID { get; set; }
+        public int? ExecutorID { get; set; }
         [ForeignKey("ExecutorID"), Required]
         public Executors? Executor { get; set; }
 
@@ -67,7 +68,7 @@ namespace ItineraryOperations.Models
             context.OperationsOfItinerary.ExecuteDelete();
             context.SaveChanges();
 
-            var itineraries =  context.Itineraries
+            var itineraries = context.Itineraries
                                         .Include(i => i.PlanPosition)
                                             .ThenInclude(pp => pp.Product)
                                                 .ThenInclude(p => p.Division)
@@ -77,12 +78,21 @@ namespace ItineraryOperations.Models
             var equipment = context.Equipment.Include(i => i.TypeOperations)
                                                 .ToList();
             Random random = new Random();
-
+            Console.WriteLine("start");
             // создаём 20 случайных операций
-            Enumerable.Range(1, 20).Select(i => {
+            Console.WriteLine(Enumerable.Range(1, 50).Select(i =>
+            {
                 int element = random.Next(itineraries.Count);
                 int divisionID = itineraries[element].PlanPosition.Product.DivisionID;
                 var equip = equipment[random.Next(equipment.Count)];
+                var filteredExecutors = executors
+                    .Where(e => e.DivisionID == divisionID)
+                    .ToList();
+
+                var randomExecutor = filteredExecutors.Any()
+                    ? filteredExecutors[random.Next(filteredExecutors.Count)]
+                    : null;
+
 
                 var operation = new OperationsOfItinerary
                 {
@@ -94,7 +104,7 @@ namespace ItineraryOperations.Models
                     NumberPositions = random.Next(60),
                     EquipmentID = equip.ID,
                     Status = 0,
-                    ExecutorID = executors.Where(executor => executor.DivisionID == divisionID).First().ID,
+                    ExecutorID = randomExecutor?.ID,
                     Name = equip.TypeOperations.Name,
                     PaymentCoefficient = (float)random.NextDouble() + 1,
                     Reward = (float)random.NextDouble(),
@@ -106,8 +116,7 @@ namespace ItineraryOperations.Models
 
                 context.OperationsOfItinerary.Add(operation);
                 return 1;
-                }).ToList();
-
+            }).ToList());
             context.SaveChanges();
 
             // Заполняем маршрутные листы только что добавленными операциями
@@ -121,7 +130,7 @@ namespace ItineraryOperations.Models
         public float CalculateRewardAmount(PostgresContext context)
         {
 
-            return Reward* (float)NormTime * NumberPositions * (float)context.OperationCategories.First(category => category.ID == CategoryID).Payment;
+            return Reward * (float)NormTime * NumberPositions * (float)context.OperationCategories.First(category => category.ID == CategoryID).Payment;
         }
 
         public float CalculateTotalWithSurcharge(PostgresContext context)

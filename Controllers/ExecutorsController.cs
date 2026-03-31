@@ -1,12 +1,15 @@
 ﻿using ItineraryOperations.Models;
+using ItineraryOperations.Models.Executor;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Swashbuckle.AspNetCore.Annotations;
+using Swashbuckle.AspNetCore.Filters;
 
 namespace ItineraryOperations.Controllers
 {
 
     [ApiController]
-    [Route("[controller]")]
+    [Route("api/[controller]")]
     public class ExecutorsController : ControllerBase
     {
 
@@ -22,39 +25,67 @@ namespace ItineraryOperations.Controllers
             _logger = logger;
         }
 
-        [HttpGet]       
-        public async Task<ActionResult<IEnumerable<Executors>>> Get()
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<ExecutorDto>>> Get()
         {
-            Executors.Felling(_context);
-            return Ok(await _context.Executors.Select(item => new Executors
-            {
-                ID = item.ID,
-                isBrigade = item.isBrigade,
-                Members = item.Members,
-                DivisionID = item.DivisionID,
-            })
-            .ToArrayAsync());
+            //Executors.Felling(_context);
+            var executors = await _context.Executors
+                .Select(executor => new ExecutorDto
+                {
+                    ID = executor.ID,
+                    IsBrigade = executor.isBrigade,
+                    Members = executor.Members,
+                    DivisionID = executor.DivisionID,
+                    OperationsIDs = _context.OperationsOfItinerary
+                        .Where(operation => operation.ExecutorID == executor.ID)
+                        .Select(oper => oper.ID)
+                        .ToArray()
+                })
+                .ToArrayAsync();
+
+            return Ok(executors);
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<Executors>> GetById(int id)
+        [SwaggerResponse(StatusCodes.Status200OK, "Успешно", typeof(ExecutorDto))]
+        [SwaggerResponse(StatusCodes.Status404NotFound, "Не найдено", typeof(APIError))]
+        [SwaggerResponseExample(StatusCodes.Status404NotFound, typeof(APIError404Example))]
+        [SwaggerResponse(StatusCodes.Status400BadRequest, "Неверный запрос", typeof(APIError))]
+        [SwaggerResponseExample(StatusCodes.Status400BadRequest, typeof(APIError400Example))]
+        public async Task<ActionResult<ExecutorDto>> GetById(int id)
         {
-            Executors? executor = await _context.Executors.FirstOrDefaultAsync(item => item.ID == id);
+            Executors? executor = await _context.Executors
+                .FirstOrDefaultAsync(executor => executor.ID == id);
+
             if (executor == null)
             {
-                return NotFound();
+                return NotFound(new APIError { Message = "Объект не найден"});
             }
             else
             {
-                return Ok(executor);
+                return Ok(new ExecutorDto(executor));
             }
         }
 
         [HttpGet("by-division")]
-        public async Task<ActionResult<IEnumerable<Executors>>> GetByDivisionID([FromQuery] int divisionID)
+        public async Task<ActionResult<IEnumerable<ExecutorDto>>> GetByDivisionID([FromQuery] int divisionID)
         {
-            List<Executors> executors = await _context.Executors.Where(item => item.DivisionID == divisionID).ToListAsync();
-            if (executors.Count == 0)
+            ExecutorDto[] executors = await _context.Executors
+                .Where(item => item.DivisionID == divisionID)
+                .Select(executor => new ExecutorDto
+                {
+                    ID = executor.ID,
+                    IsBrigade = executor.isBrigade,
+                    Members = executor.Members,
+                    DivisionID = executor.DivisionID,
+                    OperationsIDs = _context.OperationsOfItinerary
+                        .Where(operation => operation.ExecutorID == executor.ID)
+                        .Select(oper => oper.ID)
+                        .ToArray()
+                })
+                .ToArrayAsync();
+
+            if (executors.Length == 0)
             {
                 return NotFound();
             }

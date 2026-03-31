@@ -6,7 +6,7 @@ using Npgsql.PostgresTypes;
 
 namespace ItineraryOperations.Controllers
 {
-    [Route("[controller]")]
+    [Route("api/[controller]")]
     [ApiController]
     public class ItineryController : ControllerBase
     {

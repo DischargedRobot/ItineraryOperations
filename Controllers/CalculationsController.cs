@@ -12,7 +12,7 @@ using static ItineraryOperations.Models.CalculationTaskOrder;
 
 namespace ItineraryOperations.Controllers
 {
-    [Route("[controller]")]
+    [Route("api/[controller]")]
     [ApiController]
     public class CalculationsController : Controller
     {

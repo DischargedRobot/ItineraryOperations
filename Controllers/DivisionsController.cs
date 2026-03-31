@@ -9,7 +9,7 @@ using ItineraryOperations.Models;
 
 namespace ItineraryOperations.Controllers
 {
-    [Route("[controller]")]
+    [Route("api/[controller]")]
     [ApiController]
     public class DivisionsController : Controller
     {

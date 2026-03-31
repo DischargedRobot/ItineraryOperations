@@ -7,7 +7,7 @@ using Npgsql.PostgresTypes;
 
 namespace ItineraryOperations.Controllers
 {
-    [Route("[controller]")]
+    [Route("api/[controller]")]
     [ApiController]
     public class ProductsController : ControllerBase
     {
@@ -24,10 +24,10 @@ namespace ItineraryOperations.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Products>>> Get([FromQuery] int count, [FromQuery] int page)
+        public async Task<ActionResult<IEnumerable<Products>>> Get([FromQuery] int count = 100, [FromQuery] int page = 0)
         {
             List<Products> products = await _context.Products.OrderBy(p => p.ID).Skip(page * COUNT_SKIPPED_PER_PAGES).Take(count).ToListAsync();
-
+            Console.WriteLine(products);
             if (products.Count == 0)
             {
                 return NotFound();
