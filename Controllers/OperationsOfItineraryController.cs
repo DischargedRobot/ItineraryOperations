@@ -98,7 +98,7 @@ namespace ItineraryOperations.Controllers
                 .Select(op => new OperationsOfItineraryDto
                 (
                     op,
-                    op.Itinerary.PlanPosition.Product
+                    new ProductDto(op.Itinerary.PlanPosition.Product)
                 ))
                 .ToListAsync();
             //.Select(operation =>

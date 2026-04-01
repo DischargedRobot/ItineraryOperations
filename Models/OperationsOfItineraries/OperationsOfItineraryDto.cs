@@ -55,9 +55,9 @@ namespace ItineraryOperations.Models
         public bool IsFormed { get; set; }
 
         [Required]
-        public Products Product { get; set; }
+        public ProductDto Product { get; set; }
 
-        public OperationsOfItineraryDto(OperationsOfItinerary operationOfItinerary, Products product)
+        public OperationsOfItineraryDto(OperationsOfItinerary operationOfItinerary, ProductDto product)
         {
             Product = product;
             Id = operationOfItinerary.ID;
