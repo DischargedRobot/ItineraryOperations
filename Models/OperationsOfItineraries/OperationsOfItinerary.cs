@@ -13,7 +13,7 @@ namespace ItineraryOperations.Models
 
         [Required]
         public int ItineraryID { get; set; }
-        [ForeignKey("ItineraryID")]
+        [ForeignKey("ItineraryID"), Required]
         public Itinerary? Itinerary { get; set; }
 
         [Required]
@@ -44,6 +44,8 @@ namespace ItineraryOperations.Models
         public int? ExecutorID { get; set; }
         [ForeignKey("ExecutorID"), Required]
         public Executors? Executor { get; set; }
+        [Required]
+        public bool isFormed { get; set; } = false;
 
         public string Name { get; set; }
 
@@ -105,11 +107,12 @@ namespace ItineraryOperations.Models
                     EquipmentID = equip.ID,
                     Status = 0,
                     ExecutorID = randomExecutor?.ID,
-                    Name = equip.TypeOperations.Name,
+                    Name = equip.TypeOperations?.Name == null ? "Имя по умолчанию" : equip.TypeOperations.Name,
                     PaymentCoefficient = (float)random.NextDouble() + 1,
                     Reward = (float)random.NextDouble(),
                     DateIssue = DateOnly.FromDateTime(DateTime.Now),
                     DateExecution = DateOnly.FromDateTime(DateTime.Now),
+                    isFormed = random.Next(60) >= 30,
                 };
                 operation.TotalWithSurcharge = operation.CalculateTotalWithSurcharge(context);
                 operation.RewardAmount = operation.CalculateRewardAmount(context);

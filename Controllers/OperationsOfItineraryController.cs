@@ -48,12 +48,18 @@ namespace ItineraryOperations.Controllers
     //})
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<OperationsOfItinerary>>> Get()
+        public async Task<ActionResult<IEnumerable<OperationsOfItineraryDto>>> Get()
         {
             Console.WriteLine("startsss");
 
             OperationsOfItinerary.Felling(_context);
-            List<OperationsOfItinerary> operations = await _context.OperationsOfItinerary.ToListAsync();
+            List<OperationsOfItineraryDto> operations = await _context.OperationsOfItinerary
+                .Select(op => new OperationsOfItineraryDto
+                (
+                    op,
+                    op.Itinerary.PlanPosition.Product
+                ))
+                .ToListAsync();
 
             if (operations.Count == 0)
             {
@@ -86,11 +92,22 @@ namespace ItineraryOperations.Controllers
         [SwaggerResponseExample(StatusCodes.Status404NotFound, typeof(APIError404Example))]
         public async Task<ActionResult<IEnumerable<OperationsOfItineraryDto>>> GetByExecutor(int executorID)
         {
-            
+
             List<OperationsOfItineraryDto> operations = await _context.OperationsOfItinerary
                 .Where(op => op.ExecutorID == executorID)
-                .Select(operation => new OperationsOfItineraryDto (operation))
+                .Select(op => new OperationsOfItineraryDto
+                (
+                    op,
+                    op.Itinerary.PlanPosition.Product
+                ))
                 .ToListAsync();
+            //.Select(operation =>
+            //    _context.Itineraries.FirstOrDefault(itinerary =>
+            //        itinerary.ID == operation.ItineraryID))
+            //    .Select(itiner =>
+            //        _context.PlanPositions.FirstOrDefault(planPosition =>
+            //            planPosition.ID == itiner.PositionPlanID))
+            //                .Select(plan => plan.ProductID).ToListAsync();
 
             if (operations.Count == 0)
             {
