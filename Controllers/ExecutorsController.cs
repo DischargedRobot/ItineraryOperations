@@ -1,5 +1,4 @@
 ﻿using ItineraryOperations.Models;
-using ItineraryOperations.Models.Executor;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Swashbuckle.AspNetCore.Annotations;

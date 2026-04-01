@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
 using System.Diagnostics.CodeAnalysis;
 
-namespace ItineraryOperations.Models.Executor
+namespace ItineraryOperations.Models
 {
     public class ExecutorDto
     {

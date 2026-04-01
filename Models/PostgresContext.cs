@@ -1,5 +1,4 @@
-﻿using ItineraryOperations.Models.Executor;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 
 namespace ItineraryOperations.Models

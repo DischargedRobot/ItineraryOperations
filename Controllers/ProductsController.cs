@@ -4,6 +4,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using Npgsql.PostgresTypes;
+using Swashbuckle.AspNetCore.Annotations;
+using Swashbuckle.AspNetCore.Filters;
 
 namespace ItineraryOperations.Controllers
 {
@@ -24,13 +26,23 @@ namespace ItineraryOperations.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Products>>> Get([FromQuery] int count = 100, [FromQuery] int page = 0)
+        [SwaggerResponse(StatusCodes.Status200OK, "Успешно", typeof(ProductDto))]
+        [SwaggerResponse(StatusCodes.Status404NotFound, "Не найдено", typeof(APIError400Example))]
+        [SwaggerResponseExample(StatusCodes.Status404NotFound, typeof(APIError404Example))]
+
+        public async Task<ActionResult<IEnumerable<ProductDto>>> Get([FromQuery] int count = 100, [FromQuery] int page = 1)
         {
-            List<Products> products = await _context.Products.OrderBy(p => p.ID).Skip(page * COUNT_SKIPPED_PER_PAGES).Take(count).ToListAsync();
+            List<ProductDto> products = await _context.Products
+                .OrderBy(p => p.ID)
+                .Skip((page-1) * COUNT_SKIPPED_PER_PAGES)
+                .Take(count)
+                .Select(product => new ProductDto(product))
+                .ToListAsync();
+
             Console.WriteLine(products);
             if (products.Count == 0)
             {
-                return NotFound();
+                return NotFound(new APIError { Message = "Изделий нет" });
             }
             else
             {

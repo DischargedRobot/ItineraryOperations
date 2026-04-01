@@ -57,7 +57,7 @@ namespace ItineraryOperations.Controllers
                 .Select(op => new OperationsOfItineraryDto
                 (
                     op,
-                    op.Itinerary.PlanPosition.Product
+                    new ProductDto(op.Itinerary.PlanPosition.Product)
                 ))
                 .ToListAsync();
 
@@ -177,6 +177,7 @@ namespace ItineraryOperations.Controllers
                 return NotFound($"TaskOrder с ID={id} не найден");
             }
 
+            // Господи, что это... Когда я это писал...
             //Получаем все не навигационные свойства
             var properties = newOperationOfItinerary.GetType()
                             .GetProperties()

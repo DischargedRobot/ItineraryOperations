@@ -10,6 +10,12 @@ namespace ItineraryOperations.Models
         [Key]
         public int ID { get; set; }
 
+        [Required]
+        public DateOnly StartedDate { get; set; }
+        
+        [Required]
+        public DateOnly FinishedDate { get; set; }
+
         public int ProductID { get; set; }
         [ForeignKey("ProductID"), Required]
         public Products Product { get; set; }
@@ -20,7 +26,7 @@ namespace ItineraryOperations.Models
             context.SaveChanges();
 
             List<Products> products = context.Products.ToList();
-            Enumerable.Range(0, products.Count).Select(number => context.PlanPositions.Add(new PlanPosition { ProductID = products[number].ID })).ToList();
+            Enumerable.Range(0, products.Count).Select(number => context.PlanPositions.Add(new PlanPosition { ProductID = products[number].ID , StartedDate = DateOnly.FromDateTime(DateTime.Now), FinishedDate = DateOnly.FromDateTime(DateTime.Now.AddMonths(1)) })).ToList();
 
             context.SaveChanges();
         }

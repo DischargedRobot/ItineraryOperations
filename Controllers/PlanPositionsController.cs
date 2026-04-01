@@ -1,8 +1,12 @@
-﻿using ItineraryOperations.Models;
+﻿using ItineraryOperations.Lib;
+using ItineraryOperations.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.CodeAnalysis;
 using Microsoft.EntityFrameworkCore;
 using Npgsql.PostgresTypes;
+using Swashbuckle.AspNetCore.Annotations;
+using Swashbuckle.AspNetCore.Filters;
 
 namespace ItineraryOperations.Controllers
 {
@@ -47,12 +51,24 @@ namespace ItineraryOperations.Controllers
         {
             PlanPosition? planPosition = await _context.PlanPositions.FirstOrDefaultAsync(item => item.ID == id);
 
-            if (planPosition == null) {
-                return NotFound();
-            }
-            else {
-                return Ok(planPosition);
-            } 
+            return this.CheckNotFoundObject(planPosition, "Объекта нет");
+        }
+
+        [HttpGet("by-product/{productID}")]
+        [SwaggerResponse(StatusCodes.Status200OK, "Успешно", typeof(PlanPositionDto[]))]
+        [SwaggerResponse(StatusCodes.Status404NotFound, "Не найдено", typeof(APIError400Example))]
+        [SwaggerResponseExample(StatusCodes.Status404NotFound, typeof(APIError404Example))]
+        public async Task<ActionResult<PlanPositionDto[]>> GetPlanPositions(int productID)
+        {
+
+            PlanPositionDto[] planPositions = await _context.PlanPositions
+                .Where(planPos => planPos.ProductID == productID)
+                .Select(planPos => new PlanPositionDto(planPos))
+                .ToArrayAsync();
+
+
+            return this.CheckNotFoundArray(planPositions, "Позиций плана по этому издлию нет"); 
+
         }
     }
 }
