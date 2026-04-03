@@ -16,6 +16,8 @@ namespace ItineraryOperations.Models
         public DbSet<Products> Products { get; set; } = null!;
         public DbSet<TaskOrders> TaskOrders { get; set; } = null!;
         public DbSet<TypesOperations> TypesOperations { get; set; } = null!;
+        public DbSet<UserSession> UserSessions { get; set; } = null!;
+        public DbSet<Users> Users { get; set; } = null!;
 
         public PostgresContext()
         {

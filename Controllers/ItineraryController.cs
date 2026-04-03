@@ -1,14 +1,17 @@
-﻿using ItineraryOperations.Models;
+﻿using ItineraryOperations.Lib;
+using ItineraryOperations.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Npgsql.PostgresTypes;
+using Swashbuckle.AspNetCore.Annotations;
+using Swashbuckle.AspNetCore.Filters;
 
 namespace ItineraryOperations.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class ItineryController : ControllerBase
+    public class ItineraryController : ControllerBase
     {
         private readonly int COUNT_SKIPPED_PER_PAGES = 100;
 
@@ -16,7 +19,7 @@ namespace ItineraryOperations.Controllers
 
         private readonly ILogger _logger;
 
-        public ItineryController(ILogger<ItineryController> logger, PostgresContext context)
+        public ItineraryController(ILogger<ItineraryController> logger, PostgresContext context)
         {
             _logger = logger;
             _context = context;
@@ -81,19 +84,52 @@ namespace ItineraryOperations.Controllers
         }
 
         [HttpGet("{id}/OperationsOfItinerary")]
-        public async Task<ActionResult<IEnumerable<OperationsOfItinerary>>> GetOperationsOfItinerary(int id)
+        [SwaggerResponse(StatusCodes.Status200OK, "Успешно", typeof(ExecutorDto))]
+        [SwaggerResponse(StatusCodes.Status404NotFound, "Не найдено", typeof(APIError))]
+        [SwaggerResponseExample(StatusCodes.Status404NotFound, typeof(APIError404Example))]
+        public async Task<ActionResult<OperationsOfItinerary[]>> GetOperationsOfItinerary(int id)
         {
             Itinerary? itinerary = await _context.Itineraries.FirstOrDefaultAsync(item => item.ID == id);
 
-            if (itinerary == null)
+            //this.CheckNotFoundObject(itinerary, "У этой позиции плана маршрутных листов нет");
+
+            if (itinerary != null)
             {
-                return NotFound();
+                Console.WriteLine(_context.Itineraries.ToArray() + "dsfdsf");
+
+                var operations = itinerary.Operations.ToArray();
+                return this.CheckNotFoundArray(operations, "У этого маршрутного листа операций нет"); ;
             }
             else
             {
-                IList<OperationsOfItinerary> operations = itinerary.Operations;
-                return Ok(operations);
+                
+                return NotFound(new APIError { Message = "Маршрутный лист не найден" });
             }
         }
+
+        [HttpGet("by-plan-position/{planPositionId}")]
+        public async Task<ActionResult<ItineraryDto[]>> GetItineraryByPlanPosition(int planPositionId)
+        {
+            ItineraryDto[] itinerary = await _context.Itineraries
+                .Where(itiner => itiner.PositionPlanID == planPositionId)
+                .Select(itiner => new ItineraryDto(itiner))
+                .ToArrayAsync();
+
+            return this.CheckNotFoundArray(itinerary, "У этой позиции плана маршрутных листов нет");
+
+        }
+
+        [HttpPost("by-plan-positions")]
+        public async Task<ActionResult<ItineraryDto[]>> GetItineraryByPlanPositions(
+            [FromBody] int[] planPositionId) 
+        {
+            ItineraryDto[] itinerary = await _context.Itineraries
+                .Where(itiner => planPositionId.Contains(itiner.PositionPlanID)) 
+                .Select(itiner => new ItineraryDto(itiner))
+                .ToArrayAsync();
+
+            return this.CheckNotFoundArray(itinerary, "У этой позиции плана маршрутных листов нет");
+        }
+
     }
 }

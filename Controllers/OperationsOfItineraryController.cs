@@ -9,6 +9,7 @@ using ItineraryOperations.Models;
 using Microsoft.CodeAnalysis.Elfie.Serialization;
 using Swashbuckle.AspNetCore.Annotations;
 using Swashbuckle.AspNetCore.Filters;
+using ItineraryOperations.Lib;
 
 namespace ItineraryOperations.Controllers
 {
@@ -72,17 +73,62 @@ namespace ItineraryOperations.Controllers
         }
 
         [HttpGet("by-itinerary/{itineraryID}")]
-        public async Task<ActionResult<IEnumerable<OperationsOfItinerary>>> GetByItinerary(int itineraryID)
+        [SwaggerResponse(StatusCodes.Status200OK, "Успешно", typeof(OperationsOfItineraryDto))]
+        [SwaggerResponse(StatusCodes.Status404NotFound, "Не найдено", typeof(APIError400Example))]
+        [SwaggerResponseExample(StatusCodes.Status404NotFound, typeof(APIError404Example))]
+        public async Task<ActionResult<OperationsOfItineraryDto[]>> GetByItinerary(int itineraryID)
         {
-            List<OperationsOfItinerary> operations = await _context.OperationsOfItinerary.Where(op => op.ItineraryID == itineraryID).ToListAsync();
+            try
+            {
+                var itinerary = await _context.Itineraries
+                    .FirstOrDefaultAsync(itiner => itiner.ID == itineraryID);
 
-            if (operations.Count == 0)
-            {
-                return NotFound();
+                if (itinerary == null)
+                {
+                    return NotFound(new APIError { Message = "Маршрутный лист не найден" });
+                }
+
+                await _context.Entry(itinerary)
+                    .Reference(i => i.PlanPosition)
+                    .LoadAsync();
+
+                if (itinerary.PlanPosition == null)
+                {
+                    return NotFound(new APIError { Message = "Позиция плана не найдена для данного маршрутного листа" });
+                }
+
+                await _context.Entry(itinerary.PlanPosition)
+                    .Reference(pp => pp.Product)
+                    .LoadAsync();
+
+                if (itinerary.PlanPosition.Product == null)
+                {
+                    return NotFound(new APIError { Message = "Изделие не найдено для данной позиции плана" });
+                }
+
+                var productDto = new ProductDto(itinerary.PlanPosition.Product);
+
+                var operations = await _context.OperationsOfItinerary
+                    .Where(op => op.ItineraryID == itineraryID)
+                    .ToArrayAsync();
+
+                if (operations == null || operations.Length == 0)
+                {
+                    return NotFound(new APIError { Message = "Операций нет" });
+                }
+
+                var opers = operations
+                    .Select(oper => new OperationsOfItineraryDto(oper, productDto))
+                    .ToArray();
+
+                return this.CheckNotFoundArray(opers);
             }
-            else
+            catch (Exception ex)
             {
-                return Ok(operations);
+                // Логируем полную ошибку для диагностики
+                // _logger.LogError(ex, "Ошибка при получении операций для маршрутного листа {ItineraryID}", itineraryID);
+
+                return StatusCode(500, new APIError { Message = $"Внутренняя ошибка сервера: {ex.Message}" });
             }
         }
 

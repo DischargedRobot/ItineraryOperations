@@ -2,6 +2,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace ItineraryOperations.Models
 {
@@ -20,7 +21,7 @@ namespace ItineraryOperations.Models
         [Required]
         public string AUDName { get; set; }
 
-        public IList<OperationsOfItinerary> Operations { get; set; } = new List<OperationsOfItinerary>();
+        public IList<int> OperationsIds { get; set; } = new List<int>();
 
         [Required]
         public int NumberPositions { get; set; }
@@ -32,6 +33,21 @@ namespace ItineraryOperations.Models
         public DateOnly Date { get; set; }
 
         [Required]
-        public string Route { get; set; }
+        public int[] Route { get; set; }
+
+        public ItineraryDto(Itinerary itinerary)
+        {
+            ID = itinerary.ID;
+            PositionPlanID = itinerary.PositionPlanID;
+            AUDCode = itinerary.AUDCode;
+            MainSubject = itinerary.MainSubject;
+            AUDName = itinerary.AUDName;
+            OperationsIds = itinerary.Operations.Select(oper => oper.ID).ToList();
+            NumberPositions = itinerary.NumberPositions;
+            KitIncreasingKit = itinerary.KitIncreasingKit;
+            Date = itinerary.Date;
+            Route = Array.ConvertAll(Regex.Replace(itinerary.Route, @"[^\d,]", "").Split(","), int.Parse);
+        }
+        public ItineraryDto() { }
     }
 }

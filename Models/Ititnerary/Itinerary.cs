@@ -42,7 +42,8 @@ namespace ItineraryOperations.Models
             var planPositions = context.PlanPositions.ToList();
             var mainSubject = context.MainSubject.ToList();
             var random = new Random();
-            Enumerable.Range(0, 10).Select(i => 
+            var departments = context.Divisions.ToList();
+            Enumerable.Range(0, mainSubject.Count-1).Select(i => 
             {
                 var aud = mainSubject[random.Next(mainSubject.Count)];
                 context.Itineraries.Add(new Itinerary
@@ -52,7 +53,8 @@ namespace ItineraryOperations.Models
                     AUDName = aud.Name,
                     Operations = [],
                     NumberPositions = 30,
-                    KitIncreasingKit = $"30/150"
+                    KitIncreasingKit = $"30/150",
+                    Route = string.Join("-",departments.GetRange(random.Next(0, departments.Count - 4), 3).Select(dep => dep.Name))
                 });
                 return 1;
             }).ToList();

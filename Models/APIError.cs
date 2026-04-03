@@ -33,7 +33,17 @@ public class APIError400Example : IExamplesProvider<APIError>
     }
 }
 
-public class APIError500Example : IExamplesProvider<APIError>
+public class APIError401Example : IExamplesProvider<APIError>
+{
+    public APIError GetExamples()
+    {
+        return new APIError
+        {
+            Message = "Сессия недействительна",
+        };
+    }
+}
+    public class APIError500Example : IExamplesProvider<APIError>
 {
     public APIError GetExamples()
     {

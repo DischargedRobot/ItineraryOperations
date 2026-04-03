@@ -36,25 +36,27 @@ namespace ItineraryOperations.Controllers
             _logger = logger;
         }
 
-        //[HttpGet]
-        //public ActionResult<int> Get()
-        //{
-        //    Divisions.Felling(_context);
-        //    Executors.Felling(_context);
-        //    PlanPosition.Felling(_context);
-        //    OperationCategories.Felling(_context);
-        //    Itinerary.Felling(_context);
-        //    OperationsOfItinerary.Felling(_context);
-        //    TaskOrders.Felling(_context);
+        [HttpGet]
+        public ActionResult<int> Get()
+        {
+            Users.Felling(_context);
+            Divisions.Felling(_context);
+            Executors.Felling(_context);
+            Products.Felling(_context);
+            PlanPosition.Felling(_context);
+            OperationCategories.Felling(_context);
+            Itinerary.Felling(_context);
+            OperationsOfItinerary.Felling(_context);
+            TaskOrders.Felling(_context);
 
-        //    return Ok(1);
-        //    //return Ok(await _context.Divisions.Select(item => new Divisions
-        //    //{
-        //    //    ID = item.ID,
-        //    //    Name = item.Name
-        //    //})
-        //    //.ToArrayAsync());
-        //}
+            return Ok(1);
+            //return Ok(await _context.Divisions.Select(item => new Divisions
+            //{
+            //    ID = item.ID,
+            //    Name = item.Name
+            //})
+            //.ToArrayAsync());
+        }
 
         [HttpPost("operation")]
         public IActionResult PostOperation([FromBody] CalculationOperationDto calculationOperation)
