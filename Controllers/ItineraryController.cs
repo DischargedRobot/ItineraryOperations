@@ -108,6 +108,9 @@ namespace ItineraryOperations.Controllers
         }
 
         [HttpGet("by-plan-position/{planPositionId}")]
+        [SwaggerResponse(StatusCodes.Status200OK, "Успешно", typeof(ExecutorDto))]
+        [SwaggerResponse(StatusCodes.Status404NotFound, "Не найдено", typeof(APIError404Example))]
+        [SwaggerResponseExample(StatusCodes.Status404NotFound, typeof(APIError404Example))]
         public async Task<ActionResult<ItineraryDto[]>> GetItineraryByPlanPosition(int planPositionId)
         {
             ItineraryDto[] itinerary = await _context.Itineraries

@@ -41,6 +41,12 @@ namespace ItineraryOperations.Models
                         .Property(i => i.Date)
                         .HasDefaultValueSql("CURRENT_DATE");
 
+            modelBuilder.Entity<OperationsOfItinerary>()
+    .HasOne(o => o.Itinerary)
+    .WithMany(i => i.Operations) // коллекция в Itinerary: public ICollection<OperationsOfItinerary> Operations {get; set;}
+    .HasForeignKey(o => o.ItineraryID)
+    .IsRequired() // если обязательный FK
+    .OnDelete(DeleteBehavior.Restrict); // теперь EF не удаляет операцию
         }
         public PostgresContext(DbContextOptions<PostgresContext> options): base(options) 
         { 

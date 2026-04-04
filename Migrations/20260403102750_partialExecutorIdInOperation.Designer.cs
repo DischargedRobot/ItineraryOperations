@@ -3,6 +3,7 @@ using System;
 using ItineraryOperations.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace ItineraryOperations.Migrations
 {
     [DbContext(typeof(PostgresContext))]
-    partial class PostgresContextModelSnapshot : ModelSnapshot
+    [Migration("20260403102750_partialExecutorIdInOperation")]
+    partial class partialExecutorIdInOperation
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -197,9 +200,11 @@ namespace ItineraryOperations.Migrations
                         .HasColumnType("integer");
 
                     b.Property<int?>("EquipmentID")
+                        .IsRequired()
                         .HasColumnType("integer");
 
                     b.Property<int?>("ExecutorID")
+                        .IsRequired()
                         .HasColumnType("integer");
 
                     b.Property<int>("ItineraryID")
@@ -481,16 +486,20 @@ namespace ItineraryOperations.Migrations
 
                     b.HasOne("ItineraryOperations.Models.Equipment", "Equipment")
                         .WithMany()
-                        .HasForeignKey("EquipmentID");
+                        .HasForeignKey("EquipmentID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("ItineraryOperations.Models.Executors", "Executor")
                         .WithMany()
-                        .HasForeignKey("ExecutorID");
+                        .HasForeignKey("ExecutorID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("ItineraryOperations.Models.Itinerary", "Itinerary")
                         .WithMany("Operations")
                         .HasForeignKey("ItineraryID")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("ItineraryOperations.Models.TaskOrders", null)

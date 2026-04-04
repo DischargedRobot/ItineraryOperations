@@ -2,6 +2,7 @@
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Globalization;
 
 namespace ItineraryOperations.Models
 {
@@ -34,14 +35,14 @@ namespace ItineraryOperations.Models
 
         public int NumberPositions { get; set; }
 
-        public int EquipmentID { get; set; }
-        [ForeignKey("EquipmentID"), Required]
+        public int? EquipmentID { get; set; }
+        [ForeignKey("EquipmentID")]
         public Equipment? Equipment { get; set; }
 
         public int Status { get; set; }
 
         public int? ExecutorID { get; set; }
-        [ForeignKey("ExecutorID"), Required]
+        [ForeignKey("ExecutorID")]
         public Executors? Executor { get; set; }
         [Required]
         public bool isFormed { get; set; } = false;
@@ -63,6 +64,43 @@ namespace ItineraryOperations.Models
 
         [Column(TypeName = "decimal(10,3)")]
         public float RewardAmount { get; set; }
+        public OperationsOfItinerary() { }
+
+        // Конструктор из DTO в сущность
+        public OperationsOfItinerary(OperationsOfItineraryDto dto)
+        {
+            ID = dto.Id;
+            ItineraryID = dto.ItineraryId;
+            DivisionID = dto.DepartmentId;
+            CategoryID = dto.CategoryId;
+            NormTime = dto.NormTime;
+            TypeOperationID = dto.TypeId;
+            NumberPositions = dto.NumberPositions;
+            EquipmentID = dto.EquipmentId == 0 ? null : dto.EquipmentId;
+            ExecutorID = dto.ExecutorId == 0 ? null : dto.ExecutorId;
+            Name = dto.Name;
+            PaymentCoefficient = dto.PaymentCoefficient;
+            Reward = dto.Award;
+            isFormed = dto.IsFormed;
+
+            // Конвертация строк в DateOnly
+            // В конструкторе OperationsOfItinerary(DTO)
+            if (!string.IsNullOrEmpty(dto.DateIssue))
+            {
+                DateIssue = DateOnly.ParseExact(dto.DateIssue, "yyyy-MM-dd", CultureInfo.InvariantCulture);
+            }
+            
+
+            if (!string.IsNullOrEmpty(dto.DateExecution))
+            {
+                DateExecution = DateOnly.ParseExact(dto.DateExecution, "yyyy-MM-dd", CultureInfo.InvariantCulture);
+            }
+            
+
+            // Эти поля обычно вычисляются или не передаются из DTO
+            TotalWithSurcharge = dto.TotalWithSurcharge;
+            RewardAmount = dto.RewardAmount;
+        }
 
         public static void Felling(PostgresContext context)
         {

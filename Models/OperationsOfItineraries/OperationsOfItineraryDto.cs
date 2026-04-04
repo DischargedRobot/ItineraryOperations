@@ -28,7 +28,7 @@ namespace ItineraryOperations.Models
 
         public int NumberPositions { get; set; }
 
-        public int EquipmentId { get; set; }
+        public int? EquipmentId { get; set; }
 
         public int? ExecutorId { get; set; }
 
@@ -41,9 +41,9 @@ namespace ItineraryOperations.Models
         [Column(TypeName = "decimal(7,3)")]
         public float Award { get; set; }
 
-        public DateOnly DateIssue { get; set; }
+        public string DateIssue { get; set; }
 
-        public DateOnly DateExecution { get; set; }
+        public string DateExecution { get; set; }
 
         [Column(TypeName = "decimal(10,3)")]
         public float TotalWithSurcharge { get; set; }
@@ -71,8 +71,8 @@ namespace ItineraryOperations.Models
             Name = operationOfItinerary.Name;
             PaymentCoefficient = operationOfItinerary.PaymentCoefficient;
             Award = operationOfItinerary.Reward;
-            DateIssue = operationOfItinerary.DateIssue;
-            DateExecution = operationOfItinerary.DateExecution;
+            DateIssue = operationOfItinerary.DateIssue.ToString();
+            DateExecution = operationOfItinerary.DateExecution.ToString();
             IsFormed = operationOfItinerary.isFormed;
         }
 
