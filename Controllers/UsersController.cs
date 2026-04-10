@@ -55,7 +55,8 @@ namespace ItineraryOperations.Controllers
 
                 if (user == null || request.Password != user.Password)
                 {
-                    return Unauthorized(new APIError { Message = "Пользователя с таким логином и паролем не существует" });
+                    Console.WriteLine($"{user} is user for login: {request.Login}, password: {request.Password}");
+                    return NotFound(new APIError { Message = "Пользователя с таким логином и паролем не существует" });
                 }
 
                 UserSession? session = await _context.UserSessions
