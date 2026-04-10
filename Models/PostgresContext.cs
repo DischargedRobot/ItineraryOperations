@@ -43,10 +43,10 @@ namespace ItineraryOperations.Models
 
             modelBuilder.Entity<OperationsOfItinerary>()
     .HasOne(o => o.Itinerary)
-    .WithMany(i => i.Operations) // коллекция в Itinerary: public ICollection<OperationsOfItinerary> Operations {get; set;}
+    .WithMany(i => i.Operations)
     .HasForeignKey(o => o.ItineraryID)
-    .IsRequired() // если обязательный FK
-    .OnDelete(DeleteBehavior.Restrict); // теперь EF не удаляет операцию
+    .IsRequired() 
+    .OnDelete(DeleteBehavior.Restrict); 
         }
         public PostgresContext(DbContextOptions<PostgresContext> options): base(options) 
         { 
@@ -54,7 +54,10 @@ namespace ItineraryOperations.Models
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseNpgsql("Host=localhost;Port=5433;Database=itineraryOperationDb;Username=postgres;Password=546915");
+            if (!optionsBuilder.IsConfigured)
+            {
+                // Конфигурация будет установлена через DI в Program.cs
+            }
         }
 
         

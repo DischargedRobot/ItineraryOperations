@@ -140,6 +140,12 @@ namespace ItineraryOperations.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<OperationsOfItineraryDto>>> Get()
         {
+            bool sessionIsActive = await CheckSessionFunctions.CheckSession(Request, _context);
+            if (!sessionIsActive)
+            {
+                return Unauthorized(new APIError { Message = "Сессия недействительна" });
+            }
+
             Console.WriteLine("startsss");
 
             OperationsOfItinerary.Felling(_context);
@@ -169,6 +175,12 @@ namespace ItineraryOperations.Controllers
         [SwaggerResponseExample(StatusCodes.Status404NotFound, typeof(APIError404Example))]
         public async Task<ActionResult<OperationsOfItineraryDto[]>> GetByItinerary(int itineraryID)
         {
+            bool sessionIsActive = await CheckSessionFunctions.CheckSession(Request, _context);
+            if (!sessionIsActive)
+            {
+                return Unauthorized(new APIError { Message = "Сессия недействительна" });
+            }
+
             try
             {
                 return await GetOperationsForResponse(itineraryID);
@@ -188,6 +200,11 @@ namespace ItineraryOperations.Controllers
         [SwaggerResponseExample(StatusCodes.Status404NotFound, typeof(APIError404Example))]
         public async Task<ActionResult<IEnumerable<OperationsOfItineraryDto>>> GetByExecutor(int executorID)
         {
+            bool sessionIsActive = await CheckSessionFunctions.CheckSession(Request, _context);
+            if (!sessionIsActive)
+            {
+                return Unauthorized(new APIError { Message = "Сессия недействительна" });
+            }
 
             List<OperationsOfItineraryDto> operations = await _context.OperationsOfItinerary
                 .Where(op => op.ExecutorID == executorID)
@@ -218,6 +235,12 @@ namespace ItineraryOperations.Controllers
         [HttpGet("by-division/{divisionID}")]
         public async Task<ActionResult<IEnumerable<OperationsOfItinerary>>> GetByDivision(int divisionID)
         {
+            bool sessionIsActive = await CheckSessionFunctions.CheckSession(Request, _context);
+            if (!sessionIsActive)
+            {
+                return Unauthorized(new APIError { Message = "Сессия недействительна" });
+            }
+
             List<OperationsOfItinerary> operations = await _context.OperationsOfItinerary.Where(op => op.DivisionID == divisionID).ToListAsync();
 
             if (operations.Count == 0)
@@ -233,6 +256,12 @@ namespace ItineraryOperations.Controllers
         [HttpGet("by-date")]
         public async Task<ActionResult<IEnumerable<OperationsOfItinerary>>> GetByDate([FromQuery] int count, [FromQuery] int page, [FromQuery] DateOnly dateStart, [FromQuery] DateOnly? dateEnd)
         {
+            bool sessionIsActive = await CheckSessionFunctions.CheckSession(Request, _context);
+            if (!sessionIsActive)
+            {
+                return Unauthorized(new APIError { Message = "Сессия недействительна" });
+            }
+
             if (!dateEnd.HasValue)
             {
                 dateEnd = new DateOnly(dateStart.Year, dateStart.Month, DateTime.DaysInMonth(dateStart.Year, dateStart.Month));
@@ -253,6 +282,12 @@ namespace ItineraryOperations.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<OperationsOfItinerary>> GetByID(int id)
         {
+            bool sessionIsActive = await CheckSessionFunctions.CheckSession(Request, _context);
+            if (!sessionIsActive)
+            {
+                return Unauthorized(new APIError { Message = "Сессия недействительна" });
+            }
+
             OperationsOfItinerary? operations = await _context.OperationsOfItinerary.FirstOrDefaultAsync(item => item.ID == id);
             if (operations == null)
             {
@@ -269,6 +304,11 @@ namespace ItineraryOperations.Controllers
             [FromBody] int[] operationsIds
         )
         {
+            bool sessionIsActive = await CheckSessionFunctions.CheckSession(Request, _context);
+            if (!sessionIsActive)
+            {
+                return Unauthorized(new APIError { Message = "Сессия недействительна" });
+            }
 
             var opertionsForChanges = await _context.OperationsOfItinerary
                 .Where(op => operationsIds.Contains(op.ID))
@@ -297,6 +337,12 @@ namespace ItineraryOperations.Controllers
      int id,
      [FromBody] OperationsOfItineraryDto dto)
         {
+            bool sessionIsActive = await CheckSessionFunctions.CheckSession(Request, _context);
+            if (!sessionIsActive)
+            {
+                return Unauthorized(new APIError { Message = "Сессия недействительна" });
+            }
+
             var entity = await _context.OperationsOfItinerary
                 .FirstOrDefaultAsync(op => op.ID == id);
 

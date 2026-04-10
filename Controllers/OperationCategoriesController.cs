@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Npgsql.PostgresTypes;
+using ItineraryOperations.Lib;
 
 namespace ItineraryOperations.Controllers
 {
@@ -25,6 +26,12 @@ namespace ItineraryOperations.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<OperationCategories>>> Get()
         {
+            bool sessionIsActive = await CheckSessionFunctions.CheckSession(Request, _context);
+            if (!sessionIsActive)
+            {
+                return Unauthorized(new APIError { Message = "Сессия недействительна" });
+            }
+
             List<OperationCategories> mainSubjects =  await _context.OperationCategories.Select(item => new OperationCategories
             {
                 ID = item.ID,
@@ -45,8 +52,14 @@ namespace ItineraryOperations.Controllers
         }
 
         [HttpGet("{id}")]
-        public ActionResult<OperationCategories> Get(int id)
+        public async Task<ActionResult<OperationCategories>> Get(int id)
         {
+            bool sessionIsActive = await CheckSessionFunctions.CheckSession(Request, _context);
+            if (!sessionIsActive)
+            {
+                return Unauthorized(new APIError { Message = "Сессия недействительна" });
+            }
+
             OperationCategories? operationCategory = _context.OperationCategories.FirstOrDefault(item => item.ID == id);
 
             if (operationCategory == null) {
@@ -58,8 +71,14 @@ namespace ItineraryOperations.Controllers
         }
 
         [HttpGet("/by-AUDCode")]
-        public ActionResult<Products> GetByAUDCode([FromQuery] string AUDCode)
+        public async Task<ActionResult<Products>> GetByAUDCode([FromQuery] string AUDCode)
         {
+            bool sessionIsActive = await CheckSessionFunctions.CheckSession(Request, _context);
+            if (!sessionIsActive)
+            {
+                return Unauthorized(new APIError { Message = "Сессия недействительна" });
+            }
+
             Products? product = _context.Products.FirstOrDefault(item => item.AUDCode == AUDCode);
 
             if (product == null)

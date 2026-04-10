@@ -1,12 +1,25 @@
 using ItineraryOperations.Models;
 using Microsoft.EntityFrameworkCore;
 using Swashbuckle.AspNetCore.Filters;
+using DotNetEnv;
+
+// Р—Р°РіСЂСѓР¶Р°РµРј РїРµСЂРµРјРµРЅРЅС‹Рµ РѕРєСЂСѓР¶РµРЅРёСЏ РёР· .env С„Р°Р№Р»Р°
+DotNetEnv.Env.Load();
+
+var dbHost = Environment.GetEnvironmentVariable("DB_HOST") ?? "localhost";
+var dbPort = Environment.GetEnvironmentVariable("DB_PORT") ?? "5433";
+var dbName = Environment.GetEnvironmentVariable("DB_NAME") ?? "itineraryOperationDb";
+var dbUser = Environment.GetEnvironmentVariable("DB_USER") ?? "postgres";
+var dbPassword = Environment.GetEnvironmentVariable("DB_PASSWORD") ?? "";
+var dbSchema = Environment.GetEnvironmentVariable("DB_SCHEMA") ?? "public";
+
+var connectionString = $"Host={dbHost};Port={dbPort};Database={dbName};Username={dbUser};Password={dbPassword};SearchPath={dbSchema}";
 
 var builder = WebApplication.CreateBuilder(args);
 Console.OutputEncoding = System.Text.Encoding.UTF8;
 
 builder.Services.AddDbContext<PostgresContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("Host=localhost;Port=5433;Database=itineraryOperationDb;Username=postgres;Password=546915")));
+    options.UseNpgsql(connectionString));
 
 // Add services to the container.
 
@@ -19,16 +32,16 @@ builder.Services.AddSwaggerGen(c =>
     {
         Title = "ItineraryOperations API",
         Version = "v1",
-        Description = "API которое меня за*****"
+        Description = "API пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅ*****"
     });
 
-    c.EnableAnnotations();  // Для SwaggerResponse атрибутов (тайтл)
-    c.ExampleFilters(); // Для SwaggerResponseExample атрибутов (пример)
+    c.EnableAnnotations();  // пїЅпїЅпїЅ SwaggerResponse пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ (пїЅпїЅпїЅпїЅпїЅ)
+    c.ExampleFilters(); // пїЅпїЅпїЅ SwaggerResponseExample пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ (пїЅпїЅпїЅпїЅпїЅпїЅ)
 });
 builder.Services.AddSwaggerExamplesFromAssemblyOf<APIError>();
-builder.Logging.AddDebug(); // Для вывода в Debug-окно
+builder.Logging.AddDebug(); // пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅ Debug-пїЅпїЅпїЅпїЅ
 
-// Добавление CORS
+// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ CORS
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowSpecificOrigin", policy =>
@@ -41,7 +54,7 @@ builder.Services.AddCors(options =>
 });
 var app = builder.Build();
 
-// Использование CORS
+// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ CORS
 app.UseCors("AllowSpecificOrigin");
 
 

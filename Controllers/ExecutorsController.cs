@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Swashbuckle.AspNetCore.Annotations;
 using Swashbuckle.AspNetCore.Filters;
+using ItineraryOperations.Lib;
 
 namespace ItineraryOperations.Controllers
 {
@@ -27,6 +28,12 @@ namespace ItineraryOperations.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<ExecutorDto>>> Get()
         {
+            bool sessionIsActive = await CheckSessionFunctions.CheckSession(Request, _context);
+            if (!sessionIsActive)
+            {
+                return Unauthorized(new APIError { Message = "Сессия недействительна" });
+            }
+
             //Executors.Felling(_context);
             var executors = await _context.Executors
                 .Select(executor => new ExecutorDto
@@ -53,6 +60,12 @@ namespace ItineraryOperations.Controllers
         [SwaggerResponseExample(StatusCodes.Status400BadRequest, typeof(APIError400Example))]
         public async Task<ActionResult<ExecutorDto>> GetById(int id)
         {
+            bool sessionIsActive = await CheckSessionFunctions.CheckSession(Request, _context);
+            if (!sessionIsActive)
+            {
+                return Unauthorized(new APIError { Message = "Сессия недействительна" });
+            }
+
             Executors? executor = await _context.Executors
                 .FirstOrDefaultAsync(executor => executor.ID == id);
 
@@ -69,6 +82,12 @@ namespace ItineraryOperations.Controllers
         [HttpGet("by-division")]
         public async Task<ActionResult<IEnumerable<ExecutorDto>>> GetByDivisionID([FromQuery] int divisionID)
         {
+            bool sessionIsActive = await CheckSessionFunctions.CheckSession(Request, _context);
+            if (!sessionIsActive)
+            {
+                return Unauthorized(new APIError { Message = "Сессия недействительна" });
+            }
+
             ExecutorDto[] executors = await _context.Executors
                 .Where(item => item.DivisionID == divisionID)
                 .Select(executor => new ExecutorDto

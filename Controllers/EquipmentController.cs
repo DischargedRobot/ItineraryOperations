@@ -48,6 +48,12 @@ namespace ItineraryOperations.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<Equipment>> Get(int id)
         {
+            bool sessionIsActive = await CheckSessionFunctions.CheckSession(Request, _context);
+            if (!sessionIsActive)
+            {
+                return Unauthorized(new APIError { Message = "Сессия недействительна" });
+            }
+
             Equipment? equipment = await _context.Equipment.FirstOrDefaultAsync(item => item.ID == id);
 
             if (equipment == null)

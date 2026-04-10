@@ -51,6 +51,12 @@ namespace ItineraryOperations.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<Divisions>> Get(int id)
         {
+            bool sessionIsActive = await CheckSessionFunctions.CheckSession(Request, _context);
+            if (!sessionIsActive)
+            {
+                return Unauthorized(new APIError { Message = "Сессия недействительна" });
+            }
+
             Divisions? executor = await _context.Divisions.FirstOrDefaultAsync(item => item.ID == id);
             if (executor == null)
             {

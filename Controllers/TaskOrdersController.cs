@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using ItineraryOperations.Models;
+using ItineraryOperations.Lib;
 
 namespace ItineraryOperations.Controllers
 {
@@ -29,6 +30,12 @@ namespace ItineraryOperations.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<TaskOrdersController>>> Get([FromQuery] int count, [FromQuery] int page)
         {
+            bool sessionIsActive = await CheckSessionFunctions.CheckSession(Request, _context);
+            if (!sessionIsActive)
+            {
+                return Unauthorized(new APIError { Message = "Сессия недействительна" });
+            }
+
             List<TaskOrders> taskOrders = await _context.TaskOrders
                                                         .Skip(page * COUNT_SKIPPED_PER_PAGES)
                                                         .Take(count)
@@ -52,6 +59,11 @@ namespace ItineraryOperations.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<TaskOrders>> GetById(int id)
         {
+            bool sessionIsActive = await CheckSessionFunctions.CheckSession(Request, _context);
+            if (!sessionIsActive)
+            {
+                return Unauthorized(new APIError { Message = "Сессия недействительна" });
+            }
 
             TaskOrders? executor = await _context.TaskOrders.FirstOrDefaultAsync(item => item.ID == id);
             if (executor == null)
@@ -67,6 +79,12 @@ namespace ItineraryOperations.Controllers
         [HttpPost]
         public async Task<ActionResult<TaskOrders>> Post([FromBody] TaskOrders taskOrder)
         {
+            bool sessionIsActive = await CheckSessionFunctions.CheckSession(Request, _context);
+            if (!sessionIsActive)
+            {
+                return Unauthorized(new APIError { Message = "Сессия недействительна" });
+            }
+
             var divisionExists = await _context.Divisions.AnyAsync(d => d.ID == taskOrder.DivisionID);
             var executorExists = await _context.Executors.AnyAsync(e => e.ID == taskOrder.ExecutorID);
 
@@ -85,6 +103,12 @@ namespace ItineraryOperations.Controllers
         [HttpPut("{id}")]
         public async Task<ActionResult<TaskOrders>> Update(int id, [FromBody] TaskOrders newTaskOrder)
         {
+            bool sessionIsActive = await CheckSessionFunctions.CheckSession(Request, _context);
+            if (!sessionIsActive)
+            {
+                return Unauthorized(new APIError { Message = "Сессия недействительна" });
+            }
+
             var existingTaskOrder = await _context.TaskOrders.FirstOrDefaultAsync(t => t.ID == id);
             if (existingTaskOrder == null)
             {
@@ -107,6 +131,12 @@ namespace ItineraryOperations.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
+            bool sessionIsActive = await CheckSessionFunctions.CheckSession(Request, _context);
+            if (!sessionIsActive)
+            {
+                return Unauthorized(new APIError { Message = "Сессия недействительна" });
+            }
+
             TaskOrders? taskOrder = await _context.TaskOrders.FindAsync(id);
             if (taskOrder == null)
             {
@@ -123,6 +153,12 @@ namespace ItineraryOperations.Controllers
         [HttpGet("{id}/operations")]
         public async Task<ActionResult<TaskOrders>> GetOperationsById(int id)
         {
+            bool sessionIsActive = await CheckSessionFunctions.CheckSession(Request, _context);
+            if (!sessionIsActive)
+            {
+                return Unauthorized(new APIError { Message = "Сессия недействительна" });
+            }
+
             TaskOrders? taskOrder = await _context.TaskOrders.FindAsync(id);
             if (taskOrder == null)
             {

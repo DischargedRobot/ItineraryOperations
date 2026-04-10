@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using ItineraryOperations.Models;
+using ItineraryOperations.Lib;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
 using static ItineraryOperations.Models.CalculationTaskOrder;
@@ -39,8 +40,14 @@ namespace ItineraryOperations.Controllers
         }
 
         [HttpGet]
-        public ActionResult<int> Get()
+        public async Task<ActionResult<int>> Get()
         {
+            bool sessionIsActive = await CheckSessionFunctions.CheckSession(Request, _context);
+            if (!sessionIsActive)
+            {
+                return Unauthorized(new APIError { Message = "Сессия недействительна" });
+            }
+
             _logger.LogInformation("Тестовый лог - метод Get вызван в {Time}", DateTime.Now);
             
             Users.Felling(_context);
@@ -54,17 +61,17 @@ namespace ItineraryOperations.Controllers
             TaskOrders.Felling(_context);
 
             return Ok(1);
-            //return Ok(await _context.Divisions.Select(item => new Divisions
-            //{
-            //    ID = item.ID,
-            //    Name = item.Name
-            //})
-            //.ToArrayAsync());
         }
 
         [HttpPost("operation")]
-        public IActionResult PostOperation([FromBody] CalculationOperationDto calculationOperation)
+        public async Task<IActionResult> PostOperation([FromBody] CalculationOperationDto calculationOperation)
         {
+            bool sessionIsActive = await CheckSessionFunctions.CheckSession(Request, _context);
+            if (!sessionIsActive)
+            {
+                return Unauthorized(new APIError { Message = "Сессия недействительна" });
+            }
+
             //На случай ошибки при валидации
             if (!ModelState.IsValid)
             {
@@ -98,8 +105,14 @@ namespace ItineraryOperations.Controllers
         }
 
         [HttpPost("operation/{id}")]
-        public IActionResult PostOperation(int id)
+        public async Task<IActionResult> PostOperation(int id)
         {
+            bool sessionIsActive = await CheckSessionFunctions.CheckSession(Request, _context);
+            if (!sessionIsActive)
+            {
+                return Unauthorized(new APIError { Message = "Сессия недействительна" });
+            }
+
             //На случай внезапной ошибки
             try
             {
@@ -126,8 +139,13 @@ namespace ItineraryOperations.Controllers
         }
 
         [HttpGet("operation/{id}")]
-        public IActionResult GetOperation(int id)
+        public async Task<IActionResult> GetOperation(int id)
         {
+            bool sessionIsActive = await CheckSessionFunctions.CheckSession(Request, _context);
+            if (!sessionIsActive)
+            {
+                return Unauthorized(new APIError { Message = "Сессия недействительна" });
+            }
 
             var operation = calculationOperations.FirstOrDefault(oper => oper.ID == id);
             if (operation == null)
@@ -142,8 +160,13 @@ namespace ItineraryOperations.Controllers
         }
 
         [HttpDelete("operation/{id}")]
-        public IActionResult DeleteOperation(int id)
+        public async Task<IActionResult> DeleteOperation(int id)
         {
+            bool sessionIsActive = await CheckSessionFunctions.CheckSession(Request, _context);
+            if (!sessionIsActive)
+            {
+                return Unauthorized(new APIError { Message = "Сессия недействительна" });
+            }
 
             var operation = calculationOperations.FirstOrDefault(oper => oper.ID == id);
             if (operation == null)
@@ -158,8 +181,14 @@ namespace ItineraryOperations.Controllers
         }
 
         [HttpPost("taskOrder")]
-        public IActionResult PostTaskOrder([FromBody] List<OperationsOfItinerary> operations)
+        public async Task<IActionResult> PostTaskOrder([FromBody] List<OperationsOfItinerary> operations)
         {
+            bool sessionIsActive = await CheckSessionFunctions.CheckSession(Request, _context);
+            if (!sessionIsActive)
+            {
+                return Unauthorized(new APIError { Message = "Сессия недействительна" });
+            }
+
             //На случай ошибки при валидации
             if (!ModelState.IsValid)
             {
@@ -228,9 +257,14 @@ namespace ItineraryOperations.Controllers
         }
 
         [HttpGet("taskOrder/{id}")]
-        public IActionResult GetTaskOrder(int id)
+        public async Task<IActionResult> GetTaskOrder(int id)
         {
-            
+            bool sessionIsActive = await CheckSessionFunctions.CheckSession(Request, _context);
+            if (!sessionIsActive)
+            {
+                return Unauthorized(new APIError { Message = "Сессия недействительна" });
+            }
+
             var taskOrder = calculationTaskOrders.FirstOrDefault(task => task.ID == id);
             if (taskOrder == null)
             {
@@ -244,8 +278,13 @@ namespace ItineraryOperations.Controllers
         }
 
         [HttpDelete("taskOrder/{id}")]
-        public IActionResult DeleteTaskOrder(int id)
+        public async Task<IActionResult> DeleteTaskOrder(int id)
         {
+            bool sessionIsActive = await CheckSessionFunctions.CheckSession(Request, _context);
+            if (!sessionIsActive)
+            {
+                return Unauthorized(new APIError { Message = "Сессия недействительна" });
+            }
 
             var taskOrder = calculationTaskOrders.FirstOrDefault(task => task.ID == id);
             if (taskOrder == null)
@@ -273,6 +312,12 @@ namespace ItineraryOperations.Controllers
         [SwaggerResponse(StatusCodes.Status500InternalServerError, "Внутренняя ошибка сервера при генерации файла", typeof(APIError500Example))]
         public async Task<IActionResult> GenerateExcel([FromBody] ExcelGenerationRequest request)
         {
+            bool sessionIsActive = await CheckSessionFunctions.CheckSession(Request, _context);
+            if (!sessionIsActive)
+            {
+                return Unauthorized(new APIError { Message = "Сессия недействительна" });
+            }
+
             _logger.LogInformation("Начало генерации Excel файла. Количество исполнителей: {ExecutorCount}", 
                 request.Executors?.Count ?? 0);
 

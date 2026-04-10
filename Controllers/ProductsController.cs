@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using Npgsql.PostgresTypes;
 using Swashbuckle.AspNetCore.Annotations;
 using Swashbuckle.AspNetCore.Filters;
+using ItineraryOperations.Lib;
 
 namespace ItineraryOperations.Controllers
 {
@@ -32,6 +33,12 @@ namespace ItineraryOperations.Controllers
 
         public async Task<ActionResult<IEnumerable<ProductDto>>> Get([FromQuery] int count = 100, [FromQuery] int page = 1)
         {
+            bool sessionIsActive = await CheckSessionFunctions.CheckSession(Request, _context);
+            if (!sessionIsActive)
+            {
+                return Unauthorized(new APIError { Message = "Сессия недействительна" });
+            }
+
             List<ProductDto> products = await _context.Products
                 .OrderBy(p => p.ID)
                 .Skip((page-1) * COUNT_SKIPPED_PER_PAGES)
@@ -54,6 +61,12 @@ namespace ItineraryOperations.Controllers
         [HttpGet("{divisionID}")]
         public async Task<ActionResult<IEnumerable<Products>>> GetAllByDivision([FromQuery] int count, [FromQuery] int page, int divisionID)
         {
+            bool sessionIsActive = await CheckSessionFunctions.CheckSession(Request, _context);
+            if (!sessionIsActive)
+            {
+                return Unauthorized(new APIError { Message = "Сессия недействительна" });
+            }
+
             List<Products> products = await _context.Products.OrderBy(p => p.ID).Where(p => p.DivisionID == divisionID).Skip(page * COUNT_SKIPPED_PER_PAGES).Take(count).ToListAsync();
 
             if (products.Count == 0)
@@ -69,6 +82,12 @@ namespace ItineraryOperations.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<Products>> Get(int id)
         {
+            bool sessionIsActive = await CheckSessionFunctions.CheckSession(Request, _context);
+            if (!sessionIsActive)
+            {
+                return Unauthorized(new APIError { Message = "Сессия недействительна" });
+            }
+
             Products? product = await _context.Products.FirstOrDefaultAsync(item => item.ID == id);
 
             if (product == null) 
@@ -82,8 +101,14 @@ namespace ItineraryOperations.Controllers
         }
 
         [HttpGet("by-AUDCode/{AUDCode}")]
-        public ActionResult<Products> GetByAUDCode(string AUDCode)
+        public async Task<ActionResult<Products>> GetByAUDCode(string AUDCode)
         {
+            bool sessionIsActive = await CheckSessionFunctions.CheckSession(Request, _context);
+            if (!sessionIsActive)
+            {
+                return Unauthorized(new APIError { Message = "Сессия недействительна" });
+            }
+
             Products? product = _context.Products.FirstOrDefault(item => item.AUDCode == AUDCode);
 
             if (product == null)

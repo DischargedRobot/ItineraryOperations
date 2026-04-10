@@ -1,6 +1,7 @@
 ﻿using ItineraryOperations.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using ItineraryOperations.Lib;
 
 namespace ItineraryOperations.Controllers
 {
@@ -25,6 +26,12 @@ namespace ItineraryOperations.Controllers
         [HttpGet]       
         public async Task<ActionResult<IEnumerable<TypesOperations>>> Get()
         {
+            bool sessionIsActive = await CheckSessionFunctions.CheckSession(Request, _context);
+            if (!sessionIsActive)
+            {
+                return Unauthorized(new APIError { Message = "Сессия недействительна" });
+            }
+
             List<TypesOperations> typesOperations = await _context.TypesOperations.Select(index => new TypesOperations
             {
                 ID = index.ID,
@@ -44,6 +51,12 @@ namespace ItineraryOperations.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<TypesOperations>> GetById(int id)
         {
+            bool sessionIsActive = await CheckSessionFunctions.CheckSession(Request, _context);
+            if (!sessionIsActive)
+            {
+                return Unauthorized(new APIError { Message = "Сессия недействительна" });
+            }
+
             TypesOperations? typesOperations = await _context.TypesOperations.FirstOrDefaultAsync(item => item.ID == id);
             if (typesOperations == null)
             {

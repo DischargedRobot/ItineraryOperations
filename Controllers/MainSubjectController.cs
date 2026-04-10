@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Npgsql.PostgresTypes;
+using ItineraryOperations.Lib;
 
 namespace ItineraryOperations.Controllers
 {
@@ -24,6 +25,12 @@ namespace ItineraryOperations.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<MainSubject>>> Get()
         {
+            bool sessionIsActive = await CheckSessionFunctions.CheckSession(Request, _context);
+            if (!sessionIsActive)
+            {
+                return Unauthorized(new APIError { Message = "Сессия недействительна" });
+            }
+
             //void FillingInOperationListTable()
             //{
             //    MainSubject m = new MainSubject
@@ -54,8 +61,14 @@ namespace ItineraryOperations.Controllers
 
 
         [HttpGet("{id}")]
-        public ActionResult<MainSubject> Get(int id)
+        public async Task<ActionResult<MainSubject>> Get(int id)
         {
+            bool sessionIsActive = await CheckSessionFunctions.CheckSession(Request, _context);
+            if (!sessionIsActive)
+            {
+                return Unauthorized(new APIError { Message = "Сессия недействительна" });
+            }
+
             MainSubject? mainSubject = _context.MainSubject.FirstOrDefault(item => item.ID == id);
 
             if (mainSubject == null) {

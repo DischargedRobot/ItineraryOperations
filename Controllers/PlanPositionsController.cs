@@ -30,6 +30,12 @@ namespace ItineraryOperations.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<PlanPosition>>> Get([FromQuery] int count = 100, [FromQuery] int page = 1)
         {
+            bool sessionIsActive = await CheckSessionFunctions.CheckSession(Request, _context);
+            if (!sessionIsActive)
+            {
+                return Unauthorized(new APIError { Message = "Сессия недействительна" });
+            }
+
             List<PlanPosition> planPositions = await _context.PlanPositions.Skip((page-1) * COUNT_SKIPPED_PER_PAGES).Take(count).Select(item => new PlanPosition
             {
                 ID = item.ID,
@@ -49,6 +55,12 @@ namespace ItineraryOperations.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<PlanPosition>> Get(int id)
         {
+            bool sessionIsActive = await CheckSessionFunctions.CheckSession(Request, _context);
+            if (!sessionIsActive)
+            {
+                return Unauthorized(new APIError { Message = "Сессия недействительна" });
+            }
+
             PlanPosition? planPosition = await _context.PlanPositions.FirstOrDefaultAsync(item => item.ID == id);
 
             return this.CheckNotFoundObject(planPosition, "Объекта нет");
@@ -60,6 +72,11 @@ namespace ItineraryOperations.Controllers
         [SwaggerResponseExample(StatusCodes.Status404NotFound, typeof(APIError404Example))]
         public async Task<ActionResult<PlanPositionDto[]>> GetPlanPositions(int productID)
         {
+            bool sessionIsActive = await CheckSessionFunctions.CheckSession(Request, _context);
+            if (!sessionIsActive)
+            {
+                return Unauthorized(new APIError { Message = "Сессия недействительна" });
+            }
 
             PlanPositionDto[] planPositions = await _context.PlanPositions
                 .Where(planPos => planPos.ProductID == productID)

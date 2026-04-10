@@ -29,6 +29,12 @@ namespace ItineraryOperations.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Itinerary>>> Get([FromQuery] int count, [FromQuery] int page)
         {
+            bool sessionIsActive = await CheckSessionFunctions.CheckSession(Request, _context);
+            if (!sessionIsActive)
+            {
+                return Unauthorized(new APIError { Message = "Сессия недействительна" });
+            }
+
             List<Itinerary> itineraries = await _context.Itineraries.Skip(page * COUNT_SKIPPED_PER_PAGES)
                                                                     .OrderBy(i => i.ID)
                                                                     .Take(count)
@@ -47,6 +53,12 @@ namespace ItineraryOperations.Controllers
         [HttpGet("by-date")]
         public async Task<ActionResult<IEnumerable<Itinerary>>> GetByDate([FromQuery] int count, [FromQuery] int page, [FromQuery] DateOnly dateStart, [FromQuery] DateOnly? dateEnd)
         {
+            bool sessionIsActive = await CheckSessionFunctions.CheckSession(Request, _context);
+            if (!sessionIsActive)
+            {
+                return Unauthorized(new APIError { Message = "Сессия недействительна" });
+            }
+
             if (!dateEnd.HasValue)
             {
                 dateEnd = new DateOnly(dateStart.Year, dateStart.Month, DateTime.DaysInMonth(dateStart.Year, dateStart.Month));
@@ -69,8 +81,14 @@ namespace ItineraryOperations.Controllers
 
 
         [HttpGet("{id}")]
-        public ActionResult<Itinerary> Get(int id)
+        public async Task<ActionResult<Itinerary>> Get(int id)
         {
+            bool sessionIsActive = await CheckSessionFunctions.CheckSession(Request, _context);
+            if (!sessionIsActive)
+            {
+                return Unauthorized(new APIError { Message = "Сессия недействительна" });
+            }
+
             Itinerary? itinerary = _context.Itineraries.FirstOrDefault(item => item.ID == id);
 
             if (itinerary == null) 
@@ -89,6 +107,12 @@ namespace ItineraryOperations.Controllers
         [SwaggerResponseExample(StatusCodes.Status404NotFound, typeof(APIError404Example))]
         public async Task<ActionResult<OperationsOfItinerary[]>> GetOperationsOfItinerary(int id)
         {
+            bool sessionIsActive = await CheckSessionFunctions.CheckSession(Request, _context);
+            if (!sessionIsActive)
+            {
+                return Unauthorized(new APIError { Message = "Сессия недействительна" });
+            }
+
             Itinerary? itinerary = await _context.Itineraries.FirstOrDefaultAsync(item => item.ID == id);
 
             //this.CheckNotFoundObject(itinerary, "У этой позиции плана маршрутных листов нет");
@@ -113,6 +137,12 @@ namespace ItineraryOperations.Controllers
         [SwaggerResponseExample(StatusCodes.Status404NotFound, typeof(APIError404Example))]
         public async Task<ActionResult<ItineraryDto[]>> GetItineraryByPlanPosition(int planPositionId)
         {
+            bool sessionIsActive = await CheckSessionFunctions.CheckSession(Request, _context);
+            if (!sessionIsActive)
+            {
+                return Unauthorized(new APIError { Message = "Сессия недействительна" });
+            }
+
             ItineraryDto[] itinerary = await _context.Itineraries
                 .Where(itiner => itiner.PositionPlanID == planPositionId)
                 .Select(itiner => new ItineraryDto(itiner))
@@ -126,6 +156,12 @@ namespace ItineraryOperations.Controllers
         public async Task<ActionResult<ItineraryDto[]>> GetItineraryByPlanPositions(
             [FromBody] int[] planPositionId) 
         {
+            bool sessionIsActive = await CheckSessionFunctions.CheckSession(Request, _context);
+            if (!sessionIsActive)
+            {
+                return Unauthorized(new APIError { Message = "Сессия недействительна" });
+            }
+
             ItineraryDto[] itinerary = await _context.Itineraries
                 .Where(itiner => planPositionId.Contains(itiner.PositionPlanID)) 
                 .Select(itiner => new ItineraryDto(itiner))
