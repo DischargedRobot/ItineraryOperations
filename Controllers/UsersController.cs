@@ -24,18 +24,7 @@ namespace ItineraryOperations.Controllers
         }
         private void SetSessionCookie(UserSession newSession, HttpResponse Response)
         {
-            var cookieOptions = new CookieOptions
-            {
-                HttpOnly = true,
-                Secure = true,
-                SameSite = SameSiteMode.None, // Защита от кросдомена Strict - запрещает крос, None позволяет
-                Expires = newSession.Finished,  // Время истечения
-                Path = "/",                // Для каких запроcов доступен 
-            };
-
-            Console.WriteLine("setSessionId", newSession.Id);
-            Response.Cookies.Append("SessionId", newSession.Id.ToString(), cookieOptions);
-
+            CheckSessionFunctions.SetSessionCookie(newSession, Response);
         }
 
         public class AuthorizationRequest
@@ -45,6 +34,7 @@ namespace ItineraryOperations.Controllers
         }
 
         [HttpPost("auth")]
+        [Microsoft.AspNetCore.Authorization.AllowAnonymous]
         public async Task<ActionResult<UsersDto>> Authorization(
             [FromBody] AuthorizationRequest request
         )
@@ -76,7 +66,7 @@ namespace ItineraryOperations.Controllers
                 
                 if (newSessionNew == null )
                 {
-                    return StatusCode(500, "Internal server error");
+                    return StatusCode(500, "Внутренняя ошибка сервера");
                 }
 
                 SetSessionCookie(newSessionNew, Response);
@@ -87,11 +77,13 @@ namespace ItineraryOperations.Controllers
 
             catch (Exception ex)
             {
-                return StatusCode(500, "Internal server error");
+                _logger.LogError(ex, "Error while authorization");
+                return StatusCode(500, "Внутренняя ошибка сервера");
             }
         }
 
         [HttpPost("logout")]
+        [Microsoft.AspNetCore.Authorization.AllowAnonymous]
         public async Task<ActionResult<UsersDto>> Logout(
         )
         {
@@ -108,13 +100,69 @@ namespace ItineraryOperations.Controllers
 
                 }
 
-                return Ok(new { message = "Successfully logged out" });
+                return Ok(new { message = "Выход выполнен успешно" });
                 
             }
 
             catch (Exception ex)
             {
-                return StatusCode(500, "Internal server error");
+                _logger.LogError(ex, "Error while logout");
+                return StatusCode(500, "Внутренняя ошибка сервера");
+            }
+        }
+
+        [HttpGet("me")]
+        public async Task<ActionResult<UsersDto>> Me()
+        {
+            try
+            {
+                var result = await CheckSessionFunctions.CheckAndRefreshSession(Request, Response, _context);
+
+                if (!result.IsValid)
+                {
+                    return Unauthorized(new APIError { Message = result.ErrorMessage ?? "Ошибка аутентификации" });
+                }
+
+                if (result.User == null)
+                {
+                    return NotFound(new APIError { Message = "Пользователь не найден" });
+                }
+
+                return Ok(new UsersDto(result.User));
+            }
+
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error while getting current user by session");
+                return StatusCode(500, "Внутренняя ошибка сервера");
+            }
+        }
+
+        [HttpPost("refresh")]
+        [Microsoft.AspNetCore.Authorization.AllowAnonymous]
+        public async Task<ActionResult<UsersDto>> Refresh()
+        {
+            try
+            {
+                var result = await CheckSessionFunctions.CheckAndRefreshSession(Request, Response, _context);
+
+                if (!result.IsValid)
+                {
+                    return Unauthorized(new APIError { Message = result.ErrorMessage ?? "Ошибка аутентификации" });
+                }
+
+                if (result.User == null)
+                {
+                    return NotFound(new APIError { Message = "Пользователь не найден" });
+                }
+
+                return Ok(new UsersDto(result.User));
+            }
+
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error while refreshing session");
+                return StatusCode(500, "Внутренняя ошибка сервера");
             }
         }
     }

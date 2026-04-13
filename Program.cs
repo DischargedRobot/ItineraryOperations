@@ -21,10 +21,13 @@ Console.OutputEncoding = System.Text.Encoding.UTF8;
 builder.Services.AddDbContext<PostgresContext>(options =>
     options.UseNpgsql(connectionString));
 
-// Add services to the container.
+builder.Services.AddScoped<ItineraryOperations.Lib.AuthFilter>();
 
-builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+builder.Services.AddControllers(options =>
+{
+    options.Filters.AddService<ItineraryOperations.Lib.AuthFilter>();
+});
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
@@ -58,15 +61,11 @@ var app = builder.Build();
 app.UseCors("AllowSpecificOrigin");
 
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
     app.UseSwagger();
     app.UseSwaggerUI();
-}
 
-app.UseHttpsRedirection();
 
+app.UseAuthorization();
 app.UseAuthorization();
 
 app.MapControllers();
