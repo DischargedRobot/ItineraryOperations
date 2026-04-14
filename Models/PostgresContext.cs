@@ -18,6 +18,7 @@ namespace ItineraryOperations.Models
         public DbSet<TypesOperations> TypesOperations { get; set; } = null!;
         public DbSet<UserSession> UserSessions { get; set; } = null!;
         public DbSet<Users> Users { get; set; } = null!;
+        public DbSet<Role> Roles { get; set; } = null!;
 
         public PostgresContext()
         {
@@ -46,7 +47,12 @@ namespace ItineraryOperations.Models
     .WithMany(i => i.Operations)
     .HasForeignKey(o => o.ItineraryID)
     .IsRequired() 
-    .OnDelete(DeleteBehavior.Restrict); 
+    .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Role>().HasData(
+                new Role { ID = Role.BrigadirId, Name = Role.BrigadirName },
+                new Role { ID = Role.ExecutorId, Name = Role.ExecutorName }
+            ); 
         }
         public PostgresContext(DbContextOptions<PostgresContext> options): base(options) 
         { 

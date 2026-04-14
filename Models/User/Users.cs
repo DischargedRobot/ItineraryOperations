@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ItineraryOperations.Models
 {
@@ -26,6 +27,10 @@ namespace ItineraryOperations.Models
         public string? PhoneNumber { get; set; }
         public string? Email { get; set; }
 
+        public int? RoleId { get; set; }
+        [ForeignKey("RoleId")]
+        public Role? Role { get; set; }
+
         public static void Felling(PostgresContext context, int count = 10)
         {
             context.Users.ExecuteDelete();
@@ -47,7 +52,8 @@ namespace ItineraryOperations.Models
                     Login = $"user_{random.Next(1000, 9999)}",
                     Password = $"Pass{random.Next(1000, 9999)}!",
                     PhoneNumber = $"+7{random.Next(900, 999)}{random.Next(1000000, 9999999)}",
-                    Email = $"user{random.Next(1000, 9999)}@example.com"
+                    Email = $"user{random.Next(1000, 9999)}@example.com",   
+                    Role = random.Next(2) == 0 ? new Role { ID = Role.BrigadirId, Name = Role.BrigadirName } : new Role { ID = Role.ExecutorId, Name = Role.ExecutorName }
                 };
 
                 users.Add(user);

@@ -12,8 +12,8 @@ namespace ItineraryOperations.Models
         public  string Login {  get; set; }
         public string? PhoneNumber { get; set; }
         public string? Email { get; set; }
-
-
+        public int? RoleId { get; set; }
+        public string? RoleName { get; set; }
 
     public UsersDto(Users user) 
     {
@@ -24,6 +24,8 @@ namespace ItineraryOperations.Models
         Login = user.Login;
         PhoneNumber = user.PhoneNumber;
         Email = user.Email;
+        RoleId = user.RoleId;
+        RoleName = user.Role?.Name;
     }
 
     }
