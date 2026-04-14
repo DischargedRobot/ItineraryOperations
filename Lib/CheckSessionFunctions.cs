@@ -82,11 +82,7 @@ namespace ItineraryOperations.Lib
                 };
             }
 
-            // Рефрешим сессию
-            session.Finished = DateTime.UtcNow.AddMonths(1);
-            context.UserSessions.Update(session);
-            await context.SaveChangesAsync();
-            SetSessionCookie(session, response);
+            
 
             // Получаем пользователя
             Users? user = await context.Users.FirstOrDefaultAsync(u => u.ID == session.UserId);
@@ -99,6 +95,12 @@ namespace ItineraryOperations.Lib
                     ErrorMessage = "Пользователь не найден"
                 };
             }
+
+            // Рефрешим сессию (продлеваем на 4 часа)
+            session.Finished = DateTime.UtcNow.AddHours(4);
+            context.UserSessions.Update(session);
+            await context.SaveChangesAsync();
+            SetSessionCookie(session, response);
 
             return new SessionCheckResult
             {

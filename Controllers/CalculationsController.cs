@@ -312,11 +312,6 @@ namespace ItineraryOperations.Controllers
         [SwaggerResponse(StatusCodes.Status500InternalServerError, "Внутренняя ошибка сервера при генерации файла", typeof(APIError500Example))]
         public async Task<IActionResult> GenerateExcel([FromBody] ExcelGenerationRequest request)
         {
-            bool sessionIsActive = await CheckSessionFunctions.CheckSession(Request, _context);
-            if (!sessionIsActive)
-            {
-                return Unauthorized(new APIError { Message = "Сессия недействительна" });
-            }
 
             _logger.LogInformation("Начало генерации Excel файла. Количество исполнителей: {ExecutorCount}", 
                 request.Executors?.Count ?? 0);
@@ -347,6 +342,8 @@ namespace ItineraryOperations.Controllers
                 
                 worksheet.WriteOrderHeader(currentRow, orderNumber, DateTime.Now);
                 currentRow += 2;
+
+                var grandTotal = new ExcelExecutorResult();
 
                 int executorIndex = 0;
                 foreach (var executorRequest in request.Executors)
@@ -556,8 +553,18 @@ namespace ItineraryOperations.Controllers
                         
                         executorResult.WriteToExcel(worksheet, currentRow);
                         currentRow += 3;
+
+                        grandTotal.NT += executorResult.NT;
+                        grandTotal.NTonPayment += executorResult.NTonPayment;
+                        grandTotal.TotalSum += executorResult.TotalSum;
+                        grandTotal.Premium += executorResult.Premium;
+                        grandTotal.TotalSumWithPremium += executorResult.TotalSumWithPremium;
                     }
                 }
+
+                // Общий итог по всем исполнителям
+                grandTotal.WriteFooterSumToExcel(worksheet, currentRow);
+                currentRow += 2;
 
                 _logger.LogInformation("Настройка форматирования Excel файла");
                 // Настройка ширины колонок

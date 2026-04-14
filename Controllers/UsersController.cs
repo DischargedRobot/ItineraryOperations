@@ -1,5 +1,6 @@
 ﻿using ItineraryOperations.Lib;
 using ItineraryOperations.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.DotNet.Scaffolding.Shared.Messaging;
@@ -34,10 +35,11 @@ namespace ItineraryOperations.Controllers
         }
 
         [HttpPost("auth")]
-        [Microsoft.AspNetCore.Authorization.AllowAnonymous]
+        [AllowAnonymous]
         public async Task<ActionResult<UsersDto>> Authorization(
             [FromBody] AuthorizationRequest request
         )
+        
         {
             try
             {
@@ -83,7 +85,7 @@ namespace ItineraryOperations.Controllers
         }
 
         [HttpPost("logout")]
-        [Microsoft.AspNetCore.Authorization.AllowAnonymous]
+        [AllowAnonymous]
         public async Task<ActionResult<UsersDto>> Logout(
         )
         {

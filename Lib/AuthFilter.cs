@@ -17,8 +17,9 @@ namespace ItineraryOperations.Lib
 
         public async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
         {
-            // Пропускаем методы помеченные AllowAnonymous
-            var hasAllowAnonymous = context.ActionDescriptor.EndpointMetadata.Any(m => m is Microsoft.AspNetCore.Authorization.AllowAnonymousAttribute);
+            // Пропускаем методы помеченные AllowAnonymous.
+            var endpoint = context.HttpContext.GetEndpoint();
+            var hasAllowAnonymous = endpoint?.Metadata.GetMetadata<Microsoft.AspNetCore.Authorization.IAllowAnonymous>() != null;
             if (hasAllowAnonymous)
             {
                 await next();
@@ -27,7 +28,13 @@ namespace ItineraryOperations.Lib
 
             try
             {
+                var sessionCookie = context.HttpContext.Request.Cookies["SessionId"];
+                _logger.LogWarning("AuthFilter: path={Path}, SessionId cookie={Cookie}", 
+                    context.HttpContext.Request.Path, sessionCookie ?? "ОТСУТСТВУЕТ");
+
                 var result = await CheckSessionFunctions.CheckAndRefreshSession(context.HttpContext.Request, context.HttpContext.Response, _context);
+
+                _logger.LogWarning("AuthFilter: IsValid={IsValid}, Error={Error}", result.IsValid, result.ErrorMessage ?? "—");
 
                 if (!result.IsValid)
                 {
