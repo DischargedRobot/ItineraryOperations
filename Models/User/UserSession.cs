@@ -19,7 +19,7 @@ namespace ItineraryOperations.Models
 
         public UserSession(Users user) {
             UserId = user.ID;
-            Finished = DateTime.UtcNow.AddMonths(1);
+            Finished = DateTime.UtcNow.AddHours(4);
         }
 
         public UserSession() { }

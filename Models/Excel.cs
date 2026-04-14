@@ -10,18 +10,19 @@ namespace ItineraryOperations.Models
 
         public void WriteToExcel(IXLWorksheet worksheet, int row)
         {
-            // Строка 1: "Наряд: №12345"
             worksheet.Cell(row, 1).Value = $"Исполнитель: \"{Name}\"";
             worksheet.Range(row, 1, row, 5).Merge();
             worksheet.Cell(row, 1).Style.Font.SetBold(true);
             worksheet.Cell(row, 1).Style.Font.SetFontSize(12);
+            worksheet.Cell(row, 1).Style.Font.SetFontColor(XLColor.DarkBlue);
 
-            // Строка 2: "Дата: 30.09.2015"
             worksheet.Cell(row, 6).Value = $"Подразделение: {Department}";
             worksheet.Range(row, 6, row, 15).Merge();
             worksheet.Cell(row, 6).Style.Font.SetBold(true);
+            worksheet.Cell(row, 6).Style.Font.SetFontColor(XLColor.DarkBlue);
 
-            worksheet.Row(row).Style.Fill.BackgroundColor = XLColor.LightYellow;
+            for (int col = 1; col <= 15; col++)
+                worksheet.Cell(row, col).Style.Fill.BackgroundColor = XLColor.LightSteelBlue;
         }
     }
 
@@ -139,26 +140,29 @@ namespace ItineraryOperations.Models
             worksheet.Range(row, 1, row, 7).Merge();
             worksheet.Cell(row, 1).Style.Font.SetBold(true);
 
-            // НВР, руб
             worksheet.Cell(row, 8).Value = NT;
             worksheet.Cell(row, 8).Style.NumberFormat.Format = "0.0000";
 
-            // ИЦ, руб
             worksheet.Cell(row, 9).Value = NTonPayment;
             worksheet.Cell(row, 9).Style.NumberFormat.Format = "0.0000";
 
-            // Сумма 
             worksheet.Cell(row, 10).Value = TotalSum;
             worksheet.Range(row, 10, row, 11).Merge();
             worksheet.Cell(row, 10).Style.NumberFormat.Format = "0.00";
-            // Сумма с премией
+
             worksheet.Cell(row, 12).Value = TotalSumWithPremium;
             worksheet.Range(row, 12, row, 13).Merge();
             worksheet.Cell(row, 12).Style.NumberFormat.Format = "0.00";
-            // Премия профент
+
             worksheet.Cell(row, 14).Value = Premium;
             worksheet.Range(row, 14, row, 15).Merge();
             worksheet.Cell(row, 14).Style.NumberFormat.Format = "0.00";
+
+            for (int col = 1; col <= 15; col++)
+            {
+                worksheet.Cell(row, col).Style.Fill.BackgroundColor = XLColor.LightGreen;
+                worksheet.Cell(row, col).Style.Font.SetItalic(true);
+            }
         }
     }
 
@@ -175,56 +179,65 @@ namespace ItineraryOperations.Models
 
         public void WriteToExcel(IXLWorksheet worksheet, int row)
         {
-            // "Итого по начислению:" в первой колонке
-            worksheet.Cell(row, 1).Value = "Итого по начислению:";
+            worksheet.Cell(row, 1).Value = "Итого по начислению для исполнителя:";
             worksheet.Range(row, 1, row, 7).Merge();
             worksheet.Cell(row, 1).Style.Font.SetBold(true);
+            worksheet.Cell(row, 1).Style.Font.SetFontColor(XLColor.DarkOrange);
 
-            // НВР, руб
             worksheet.Cell(row, 8).Value = NT;
             worksheet.Cell(row, 8).Style.NumberFormat.Format = "0.0000";
 
-            // ИЦ, руб
             worksheet.Cell(row, 9).Value = NTonPayment;
             worksheet.Cell(row, 9).Style.NumberFormat.Format = "0.0000";
 
-            // Сумма с премией
             worksheet.Cell(row, 10).Value = TotalSumWithPremium;
             worksheet.Range(row, 10, row, 13).Merge();
             worksheet.Cell(row, 10).Style.NumberFormat.Format = "0.00";
-            // Премия в проффентах
+
             worksheet.Cell(row, 14).Value = Premium;
             worksheet.Range(row, 14, row, 15).Merge();
             worksheet.Cell(row, 14).Style.NumberFormat.Format = "0.00";
+
+            for (int col = 1; col <= 15; col++)
+            {
+                worksheet.Cell(row, col).Style.Fill.BackgroundColor = XLColor.LightSalmon;
+                worksheet.Cell(row, col).Style.Font.SetBold(true);
+            }
         }
 
         public void WriteFooterSumToExcel(IXLWorksheet worksheet, int row)
         {
-            // "Итого по начислению:" в первой колонке
-            worksheet.Cell(row, 1).Value = "Общий итог";
+            worksheet.Cell(row, 1).Value = "ОБЩИЙ ИТОГ ПО ВСЕМ ИСПОЛНИТЕЛЯМ";
             worksheet.Range(row, 1, row, 7).Merge();
             worksheet.Cell(row, 1).Style.Font.SetBold(true);
+            worksheet.Cell(row, 1).Style.Font.SetFontSize(12);
+            worksheet.Cell(row, 1).Style.Font.SetFontColor(XLColor.White);
 
-            // Ц, руб
             worksheet.Cell(row, 8).Value = NT;
             worksheet.Cell(row, 8).Style.NumberFormat.Format = "0.0000";
 
-            // НВР, руб
             worksheet.Cell(row, 9).Value = NTonPayment;
             worksheet.Cell(row, 9).Style.NumberFormat.Format = "0.0000";
 
-            // Сумма 
             worksheet.Cell(row, 10).Value = TotalSum;
             worksheet.Range(row, 10, row, 11).Merge();
             worksheet.Cell(row, 10).Style.NumberFormat.Format = "0.00";
-            // Премия
+
             worksheet.Cell(row, 12).Value = TotalSumWithPremium;
             worksheet.Range(row, 12, row, 13).Merge();
             worksheet.Cell(row, 12).Style.NumberFormat.Format = "0.00";
-            // Сумма (колонка 11)
+
             worksheet.Cell(row, 14).Value = Premium;
             worksheet.Range(row, 14, row, 15).Merge();
             worksheet.Cell(row, 14).Style.NumberFormat.Format = "0.00";
+
+            for (int col = 1; col <= 15; col++)
+            {
+                worksheet.Cell(row, col).Style.Fill.BackgroundColor = XLColor.DarkSlateBlue;
+                worksheet.Cell(row, col).Style.Font.SetBold(true);
+                worksheet.Cell(row, col).Style.Font.SetFontColor(XLColor.White);
+                worksheet.Cell(row, col).Style.Border.OutsideBorder = XLBorderStyleValues.Medium;
+            }
         }
     }
 
